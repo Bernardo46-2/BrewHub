@@ -1,2 +1,2 @@
 # BrewHub
-Uma plataforma gamificada de escritório virtual inspirada em ambientes de café, projetada especificamente para programadores e entusiastas da tecnologia. Colabore, conecte-se e divirta-se em um espaço virtual que combina trabalho e lazer
+O BrewHub é uma plataforma gamificada de escritório virtual, inspirada na atmosfera de cafés coworking, que visa proporcionar um ambiente virtual colaborativo e descontraído. Sua finalidade principal é reaproximar trabalhadores em home office, especialmente programadores e entusiastas da tecnologia, em um espaço digital onde podem trabalhar, se conectar e relaxar, combinando elementos de trabalho e lazer em um único ambiente.
