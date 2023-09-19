@@ -16,9 +16,16 @@ async fn send_to_chatroom(ws: WebSocket, room_id: usize, rooms: Arc<Mutex<List<C
     }
 }
 
+// https://github.com/seanmonstar/warp/issues/729
+
 #[tokio::main]
 async fn main() {
     let rooms = Arc::new(Mutex::new(List::new()));
+
+    let cors = warp::cors()
+        .allow_any_origin()
+        .allow_headers(vec!["Access-Control-Allow-Origin", "Origin", ""])
+        .allow_methods(vec!["GET"]);
     
     let rooms_clone = rooms.clone();
     let new_room = warp::path("new_room")

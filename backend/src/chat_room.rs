@@ -13,7 +13,7 @@ use crate::list::List;
 pub struct User {
     id: usize,
     name: String,
-    sender: UnboundedSender<Message>
+    sender: UnboundedSender<Message> // remove this from here
 }
 
 impl User {
@@ -30,8 +30,7 @@ impl User {
 pub struct ChatRoom {
     id: usize,
     cap: usize,
-    len: usize,
-    connections: Arc<Mutex<List<User>>>
+    connections: Arc<Mutex<Vec<User>>>
 }
 
 impl ChatRoom {
@@ -39,8 +38,7 @@ impl ChatRoom {
         Self { 
             id, 
             cap: 5, 
-            len: 0,
-            connections: Arc::new(Mutex::new(List::new()))
+            connections: Arc::new(Mutex::new(Vec::with_capacity(2)))
         }
     }
 
@@ -48,11 +46,16 @@ impl ChatRoom {
         self.id
     }
 
+    // pub fn len(&self) -> usize {
+    //     self.connections.lock().unwrap().len()
+    // }
+
     pub fn has_room(&self) -> bool {
-        self.len < self.cap
+        // self.len() < self.cap
+        true
     }
 
-    fn broadcast(connections: Arc<Mutex<List<User>>>, msg: Message) {
+    fn broadcast(connections: Arc<Mutex<Vec<User>>>, msg: Message) {
         let mut cs = connections.lock().unwrap();
         cs.iter_mut().for_each(|c| {
             c.sender.send(msg.clone())
@@ -64,9 +67,10 @@ impl ChatRoom {
 
     async fn handle_user_messages(
         user_id: usize,
-        connections: Arc<Mutex<List<User>>>, 
+        connections: Arc<Mutex<Vec<User>>>, 
         mut rx: SplitStream<WebSocket>
     ) {
+        println!("{} joined", user_id);
         Self::broadcast(connections.clone(), Message::text(format!("User {} joined chat", user_id)));
 
         while let Some(result) = rx.next().await {
@@ -84,9 +88,12 @@ impl ChatRoom {
             }
         }
 
-        let mut cs = connections.lock().unwrap();
-        cs.retain(|c| c.id != user_id);
+        {
+            let mut cs = connections.lock().unwrap();
+            cs.retain(|c| c.id != user_id);
+        }
         Self::broadcast(connections.clone(), Message::text(format!("User {} left the chat", user_id)));
+        println!("{} left", user_id);
     }
 
     pub fn push_connection(&mut self, ws: WebSocket) {
@@ -112,7 +119,6 @@ impl ChatRoom {
         // safe because: trust me bro
         let user_id = unsafe {
             c.push(User::new(USER_ID, tx));
-            self.len += 1;
             USER_ID += 1;
             USER_ID - 1
         };
