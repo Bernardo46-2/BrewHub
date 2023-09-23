@@ -18,6 +18,7 @@ class _RegisterPage extends State<RegisterPage> {
   @override
   Widget build(BuildContext ctx) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: <Widget>[
           Opacity(
@@ -25,8 +26,8 @@ class _RegisterPage extends State<RegisterPage> {
             child: Image.asset(
               'assets/background.jpg',
               fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
+              width: MediaQuery.of(ctx).size.width,
+              height: MediaQuery.of(ctx).size.height,
             )
           ),
           Center(

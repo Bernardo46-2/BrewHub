@@ -17,6 +17,7 @@ class _LoginPage extends State<LoginPage> {
   @override
   Widget build(BuildContext ctx) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: <Widget>[
           Opacity(
@@ -24,8 +25,8 @@ class _LoginPage extends State<LoginPage> {
             child: Image.asset(
               'assets/background.jpg',
               fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
+              width: MediaQuery.of(ctx).size.width,
+              height: MediaQuery.of(ctx).size.height,
             )
           ),
           Center(
