@@ -1,4 +1,5 @@
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
+use std::collections::HashMap;
 
 use warp::filters::ws::WebSocket;
 use warp::ws::Message;
@@ -7,30 +8,14 @@ use futures::SinkExt;
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
-use crate::list::List;
-
-#[derive(Debug)]
-pub struct User {
-    id: usize,
-    name: String,
-    sender: UnboundedSender<Message> // remove this from here
-}
-
-impl User {
-    fn new(id: usize, sender: UnboundedSender<Message>) -> Self {
-        Self {
-            id,
-            name: String::from("yo"),
-            sender
-        }
-    }
-}
+pub type Rooms = Arc<RwLock<HashMap<usize, Arc<RwLock<ChatRoom>>>>>;
+type Connections = Arc<RwLock<HashMap<usize, UnboundedSender<Message>>>>;
 
 #[derive(Debug)]
 pub struct ChatRoom {
     id: usize,
     cap: usize,
-    connections: Arc<Mutex<Vec<User>>>
+    connections: Connections
 }
 
 impl ChatRoom {
@@ -38,38 +23,25 @@ impl ChatRoom {
         Self { 
             id, 
             cap: 5, 
-            connections: Arc::new(Mutex::new(Vec::with_capacity(2)))
+            connections: Arc::new(RwLock::new(HashMap::new()))
         }
     }
 
-    pub fn id(&self) -> usize {
-        self.id
-    }
-
-    // pub fn len(&self) -> usize {
-    //     self.connections.lock().unwrap().len()
-    // }
-
     pub fn has_room(&self) -> bool {
-        // self.len() < self.cap
-        true
+        self.connections.read().unwrap().len() < self.cap
     }
 
-    fn broadcast(connections: Arc<Mutex<Vec<User>>>, msg: Message) {
-        let mut cs = connections.lock().unwrap();
-        cs.iter_mut().for_each(|c| {
-            c.sender.send(msg.clone())
+    fn broadcast(connections: Connections, msg: Message) {
+        let mut cs = connections.write().unwrap();
+        cs.iter_mut().for_each(|(_, c)| {
+            c.send(msg.clone())
                 .unwrap_or_else(|e| {
                     eprintln!("error sending message: {}", e);
                 });
         });
     }
 
-    async fn handle_user_messages(
-        user_id: usize,
-        connections: Arc<Mutex<Vec<User>>>, 
-        mut rx: SplitStream<WebSocket>
-    ) {
+    async fn handle_user_messages(user_id: usize, connections: Connections, mut rx: SplitStream<WebSocket>) {
         println!("{} joined", user_id);
         Self::broadcast(connections.clone(), Message::text(format!("User {} joined chat", user_id)));
 
@@ -88,15 +60,12 @@ impl ChatRoom {
             }
         }
 
-        {
-            let mut cs = connections.lock().unwrap();
-            cs.retain(|c| c.id != user_id);
-        }
+        connections.write().unwrap().remove(&user_id);
         Self::broadcast(connections.clone(), Message::text(format!("User {} left the chat", user_id)));
         println!("{} left", user_id);
     }
 
-    pub fn push_connection(&mut self, ws: WebSocket) {
+    pub fn push_connection(room: Arc<RwLock<ChatRoom>>, ws: WebSocket) {
         static mut USER_ID: usize = 0;
 
         let (mut ws_tx, ws_rx) = ws.split();
@@ -114,16 +83,18 @@ impl ChatRoom {
             }
         });
 
-        let mut c = self.connections.lock().unwrap();
-
         // safe because: trust me bro
         let user_id = unsafe {
-            c.push(User::new(USER_ID, tx));
+            let c = room.read().unwrap();
+            c.connections
+                .write()
+                .unwrap()
+                .insert(USER_ID, tx);
             USER_ID += 1;
             USER_ID - 1
         };
 
-        let cs = self.connections.clone();
+        let cs = room.read().unwrap().connections.clone();
         tokio::task::spawn(async move {
             Self::handle_user_messages(user_id, cs, ws_rx).await;
         });

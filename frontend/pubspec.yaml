@@ -91,3 +91,6 @@ flutter:
 
   assets:
     - assets/doggo.jpg
+    - assets/background.jpg
+    - assets/google.png
+    

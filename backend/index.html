@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .msg {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="feed"></div>
+    <form id="msg">
+        <input id="msg_input" type="text">
+        <button type="submit">Send</button>
+    </form>
+    <form id="join">
+        <input id="join_input" type="text">
+        <button type="submit">Join</button>
+    </form>
+
+    <script>
+        const feed = document.getElementById('feed');
+        const msg = document.getElementById('msg');
+        const join = document.getElementById('join');
+        const msg_input = document.getElementById('msg_input');
+        const join_input = document.getElementById('join_input');
+        let socket;
+
+        join.onsubmit = e => {
+            e.preventDefault();
+            socket = new WebSocket(`ws://localhost:8080/join/${join_input.value}`);
+            console.log(socket);
+            socket.onmessage = e => {
+                console.log(e);
+                feed.innerHTML += `<span class="msg">${e.data}</span>`;
+            }
+        }
+
+        msg.onsubmit = e => {
+            e.preventDefault();
+            if(socket != undefined) {
+                socket.send(msg_input.value);
+                msg_input.value = ''
+            }
+        }
+
+        onclose = () => {
+            if(socket != undefined) {
+                socket.close();
+            }
+        }
+    </script>
+</body>
+</html>
