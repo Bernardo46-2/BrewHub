@@ -4,46 +4,8 @@ import 'package:brewhub/colors.dart';
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
-  final String title = "Login";
-
   @override
   State<LoginPage> createState() => _LoginPage();
-}
-
-class _FadingImage extends StatefulWidget {
-  final GlobalKey<_FadingImageState> key;
-
-  const _FadingImage({required this.key}) : super(key: key);
-  
-  @override
-  _FadingImageState createState() => _FadingImageState();
-}
-
-class _FadingImageState extends State<_FadingImage> {
-  double opacity = 0;
-
-  void fadeIn() {
-    setState(() {
-      opacity = 1;
-    });
-  }
-
-  @override
-  Widget build(BuildContext ctx) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        AnimatedOpacity(
-          opacity: opacity,
-          duration: const Duration(seconds: 3),
-          child: Image.asset(
-            'assets/doggo.jpg',
-            fit: BoxFit.contain
-          )
-        )
-      ]
-    );
-  }
 }
 
 class _LoginPage extends State<LoginPage> {
@@ -64,9 +26,7 @@ class _LoginPage extends State<LoginPage> {
   @override
   Widget build(BuildContext ctx) {
     return GestureDetector(
-      onTap: () {
-        FocusScope.of(ctx).unfocus();
-      },
+      onTap: FocusScope.of(ctx).unfocus,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Stack(
@@ -289,9 +249,7 @@ class _LoginPage extends State<LoginPage> {
               bottom: 16,
               right: 10,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                },
+                onPressed: Navigator.of(ctx).pop,
                 style: ElevatedButton.styleFrom(
                   shape: const CircleBorder(),
                   elevation: 0
@@ -311,6 +269,40 @@ class _LoginPage extends State<LoginPage> {
           ]
         ),
       )
+    );
+  }
+}
+
+class _FadingImage extends StatefulWidget {
+  const _FadingImage({required key}) : super(key: key);
+  
+  @override
+  _FadingImageState createState() => _FadingImageState();
+}
+
+class _FadingImageState extends State<_FadingImage> {
+  double opacity = 0;
+
+  void fadeIn() {
+    setState(() {
+      opacity = 1;
+    });
+  }
+
+  @override
+  Widget build(BuildContext ctx) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        AnimatedOpacity(
+          opacity: opacity,
+          duration: const Duration(seconds: 3),
+          child: Image.asset(
+            'assets/doggo.jpg',
+            fit: BoxFit.contain
+          )
+        )
+      ]
     );
   }
 }

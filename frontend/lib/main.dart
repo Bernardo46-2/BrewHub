@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:brewhub/welcome.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const BrewHub());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class BrewHub extends StatelessWidget {
+  const BrewHub({super.key});
 
   @override
   Widget build(BuildContext context) {
