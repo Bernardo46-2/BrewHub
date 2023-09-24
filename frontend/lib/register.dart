@@ -16,9 +16,7 @@ class _RegisterPage extends State<RegisterPage> {
   @override
   Widget build(BuildContext ctx) {
     return GestureDetector(
-      onTap: () {
-        FocusScope.of(ctx).unfocus();
-      },
+      onTap: FocusScope.of(ctx).unfocus,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Stack(
