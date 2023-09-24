@@ -246,7 +246,7 @@ class _RegisterPage extends State<RegisterPage> {
                       ]
                     )
                   ),
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 10),
                   SizedBox(
                     width: componentsWidth,
                     child: Column(

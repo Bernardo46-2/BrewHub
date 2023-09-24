@@ -201,7 +201,7 @@ class _LoginPage extends State<LoginPage> {
                       ]
                     )
                   ),
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 10),
                   SizedBox(
                     width: componentsWidth,
                     child: Column(
