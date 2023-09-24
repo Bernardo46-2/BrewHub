@@ -4,8 +4,6 @@ import 'package:brewhub/colors.dart';
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
-  final String title = "Login";
-
   @override
   State<RegisterPage> createState() => _RegisterPage();
 }

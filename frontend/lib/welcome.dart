@@ -64,8 +64,8 @@ class _WelcomePage extends State<WelcomePage> {
                     ),
                   ],
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
+                Positioned(
+                  bottom: 50,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.center,
