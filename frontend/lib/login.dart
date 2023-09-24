@@ -195,13 +195,13 @@ class _LoginPage extends State<LoginPage> {
                             'Login',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 15,
                             )
                           )
                         ),
                       ]
                     )
                   ),
+                  const SizedBox(height: 15),
                   SizedBox(
                     width: componentsWidth,
                     child: Column(
