@@ -1,7 +1,8 @@
-import 'package:brewhub/style.dart';
 import 'package:flutter/material.dart';
-import 'package:brewhub/login.dart';
-import 'package:brewhub/register.dart';
+import 'package:flutter/services.dart';
+import 'package:brewhub/welcome/login.dart';
+import 'package:brewhub/welcome/register.dart';
+import 'package:brewhub/style.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -15,11 +16,20 @@ class _WelcomePage extends State<WelcomePage> {
 
   @override
   Widget build(BuildContext ctx) {
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        systemNavigationBarColor: dark3,
+        systemNavigationBarIconBrightness: Brightness.light,
+        statusBarColor: Colors.transparent, 
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: <Widget>[
-          backgroundImage(ctx),
+          backgroundWelcome(ctx),
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
@@ -85,9 +95,7 @@ class _WelcomePage extends State<WelcomePage> {
                           Text(
                             'Seu café virtual para conexões reais. Trabalhe, relaxe e conecte-se. Entre e faça parte da nossa comunidade!',
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: Color.fromARGB(128, 255, 255, 255)),
+                            style: TextStyle(fontSize: 18, color: white50),
                           ),
                         ],
                       ),

@@ -21,7 +21,7 @@ class _RegisterPage extends State<RegisterPage> {
         resizeToAvoidBottomInset: false,
         body: Stack(
           children: <Widget>[
-            backgroundImage(ctx),
+            backgroundWelcome(ctx),
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -49,7 +49,7 @@ class _RegisterPage extends State<RegisterPage> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 18,
-                            color: Color.fromARGB(128, 255, 255, 255)
+                            color: white50
                           ),
                         ),
                       ],

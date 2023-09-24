@@ -1,6 +1,6 @@
 import 'package:brewhub/style.dart';
 import 'package:flutter/material.dart';
-import 'package:brewhub/welcome.dart';
+import 'package:brewhub/welcome/welcome.dart';
 
 void main() {
   runApp(const BrewHub());
