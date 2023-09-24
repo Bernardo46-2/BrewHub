@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:brewhub/colors.dart';
+import 'package:brewhub/style.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -31,15 +31,7 @@ class _LoginPage extends State<LoginPage> {
         resizeToAvoidBottomInset: false,
         body: Stack(
           children: <Widget>[
-            Opacity(
-              opacity: .3,
-              child: Image.asset(
-                'assets/background.jpg',
-                fit: BoxFit.cover,
-                width: MediaQuery.of(ctx).size.width,
-                height: MediaQuery.of(ctx).size.height,
-              )
-            ),
+            backgroundImage(ctx),
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,

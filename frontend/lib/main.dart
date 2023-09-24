@@ -1,4 +1,4 @@
-import 'package:brewhub/colors.dart';
+import 'package:brewhub/style.dart';
 import 'package:flutter/material.dart';
 import 'package:brewhub/welcome.dart';
 

@@ -1,4 +1,4 @@
-import 'package:brewhub/colors.dart';
+import 'package:brewhub/style.dart';
 import 'package:flutter/material.dart';
 import 'package:brewhub/login.dart';
 import 'package:brewhub/register.dart';
@@ -19,15 +19,7 @@ class _WelcomePage extends State<WelcomePage> {
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: <Widget>[
-          Opacity(
-            opacity: .3,
-            child: Image.asset(
-              'assets/background.jpg',
-              fit: BoxFit.cover,
-              width: MediaQuery.of(ctx).size.width,
-              height: MediaQuery.of(ctx).size.height,
-            ),
-          ),
+          backgroundImage(ctx),
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[

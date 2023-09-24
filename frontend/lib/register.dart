@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:brewhub/colors.dart';
+import 'package:brewhub/style.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -23,15 +23,7 @@ class _RegisterPage extends State<RegisterPage> {
         resizeToAvoidBottomInset: false,
         body: Stack(
           children: <Widget>[
-            Opacity(
-              opacity: .3,
-              child: Image.asset(
-                'assets/background.jpg',
-                fit: BoxFit.cover,
-                width: MediaQuery.of(ctx).size.width,
-                height: MediaQuery.of(ctx).size.height,
-              )
-            ),
+            backgroundImage(ctx),
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,

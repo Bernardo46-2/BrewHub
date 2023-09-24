@@ -9,7 +9,8 @@ const Color primary6 = Color(0xFFE1BCAB);
 
 const Color dark1 = Color(0xFF111314); // For body background color
 const Color dark2 = Color(0xFF272829); // For cards background color
-const Color dark3 = Color(0xFF3E3F40); // For chips buttons, dropdowns background color
+const Color dark3 =
+    Color(0xFF3E3F40); // For chips buttons, dropdowns background color
 const Color dark4 = Color(0xFF565858); // For sidebars, navbar background color
 const Color dark5 = Color(0xFF707172); // For modal, dialogs background color
 const Color dark6 = Color(0xFF8B8C8C); // For on background texts color
@@ -33,15 +34,25 @@ final ThemeData brewHubTheme = ThemeData(
     brightness: Brightness.light,
     error: feedbackRed,
   ),
-
   scaffoldBackgroundColor: dark1,
   appBarTheme: const AppBarTheme(
     backgroundColor: dark4,
   ),
-
   inputDecorationTheme: const InputDecorationTheme(
-    fillColor: dark5,
-    filled: true,
-    labelStyle: TextStyle(color: Colors.white)
-  ),
+      fillColor: dark5,
+      filled: true,
+      labelStyle: TextStyle(color: Colors.white)),
 );
+
+Opacity backgroundImage(BuildContext ctx) {
+  return Opacity(
+    opacity: .3,
+    child: Image.asset(
+      'assets/background.jpg',
+      fit: BoxFit.cover,
+      alignment: const Alignment(-.5, 0),
+      width: MediaQuery.of(ctx).size.width,
+      height: MediaQuery.of(ctx).size.height,
+    ),
+  );
+}
