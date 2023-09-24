@@ -67,7 +67,7 @@ class _LoginPage extends State<LoginPage> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 18,
-                            color: Colors.white
+                            color: Color.fromARGB(128, 255, 255, 255)
                           ),
                         ),
                       ],

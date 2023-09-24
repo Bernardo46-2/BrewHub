@@ -14,7 +14,7 @@ class BrewHub extends StatelessWidget {
     return MaterialApp(
       title: 'BrewHub',
       theme: brewHubTheme,
-      home: const WelcomePage(title: 'BrewHub'),
+      home: const WelcomePage(),
       debugShowCheckedModeBanner: false,
     );
   }

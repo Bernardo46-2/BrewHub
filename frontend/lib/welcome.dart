@@ -4,9 +4,7 @@ import 'package:brewhub/login.dart';
 import 'package:brewhub/register.dart';
 
 class WelcomePage extends StatefulWidget {
-  const WelcomePage({super.key, required this.title});
-
-  final String title;
+  const WelcomePage({super.key});
 
   @override
   State<WelcomePage> createState() => _WelcomePage();
@@ -69,11 +67,7 @@ class _WelcomePage extends State<WelcomePage> {
                   ),
                 ),
               ),
-              
-              // Espaço entre o logo e os textos/botões
               Expanded(child: Container()),
-
-              // Texts and Buttons Section
               Padding(
                 padding: const EdgeInsets.only(bottom: 30),
                 child: Column(
