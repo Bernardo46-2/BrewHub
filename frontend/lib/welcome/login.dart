@@ -146,20 +146,20 @@ class _LoginPage extends State<LoginPage> {
                           children: <Widget>[
                             ElevatedButton(
                                 onPressed: () {
+                                  // TODO: handle login
                                   final String e = _emailTextController.text;
                                   final String p = _pwdTextController.text;
 
                                   if (_imgHidden && e == '' && p == 'doggo') {
                                     fadingImageKey.currentState?.fadeIn();
                                     _imgHidden = false;
+                                  } else {
+                                    Navigator.of(ctx).push(
+                                      MaterialPageRoute(
+                                        builder: (ctx) => const Navigation(),
+                                      ),
+                                    );
                                   }
-
-                                  // TODO: handle login
-                                  Navigator.of(ctx).push(
-                                    MaterialPageRoute(
-                                      builder: (ctx) => const Navigation(),
-                                    ),
-                                  );
                                 },
                                 style: ElevatedButton.styleFrom(
                                   minimumSize: const Size(componentsWidth, 40),
