@@ -1,5 +1,8 @@
+import 'package:brewhub/chat/chat.dart';
 import 'package:flutter/material.dart';
 import 'package:brewhub/style.dart';
+import 'package:brewhub/models/friend.dart';
+import 'package:provider/provider.dart';
 
 class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
@@ -9,8 +12,21 @@ class FriendsPage extends StatefulWidget {
 }
 
 class _FriendsPage extends State<FriendsPage> {
+  List<Friend> friends = []; // Lista de amigos
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Acesse o FriendsProvider para obter a lista de amigos
+    FriendsProvider friendsProvider = Provider.of<FriendsProvider>(context);
+
+    // Obtenha a lista de amigos do FriendsProvider
+    List<Friend> friends = friendsProvider.friends;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: dark3,
@@ -21,13 +37,18 @@ class _FriendsPage extends State<FriendsPage> {
             margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
             width: 40,
             decoration: BoxDecoration(
-              color: primary3,
+              color: primary4_75,
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
               icon: const Icon(Icons.person_add, color: Colors.white),
               onPressed: () {
-                // TODO: Código para adicionar alguém
+                // Obtém uma referência ao FriendsProvider
+                FriendsProvider friendsProvider =
+                    Provider.of<FriendsProvider>(context, listen: false);
+
+                // Chama a função para adicionar um amigo
+                friendsProvider.addFriend();
               },
             ),
           ),
@@ -35,148 +56,118 @@ class _FriendsPage extends State<FriendsPage> {
       ),
       body: Stack(
         children: [
-          backgroundHome(context), // Sua imagem de fundo
-          FriendsList(),
+          backgroundHome(context),
+          FriendsList(friends: friends),
         ],
       ),
     );
   }
 }
 
-class Friend {
-  final String name;
-  final String description;
-  final String imageUrl;
-  final bool isOnline;
-
-  Friend({
-    required this.name,
-    required this.description,
-    required this.imageUrl,
-    required this.isOnline,
-  });
-}
-
 class FriendTile extends StatelessWidget {
   final Friend friend;
   final bool isLast;
 
-  const FriendTile({Key? key, required this.friend, this.isLast = false}) : super(key: key);
+  const FriendTile({super.key, required this.friend, required this.isLast});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ListTile(
-          leading: CircleAvatar(
-            backgroundImage: AssetImage(
-              friend.imageUrl,
-            ),
-          ),
-          title: Text(
-            friend.name,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          subtitle: Text(
-            friend.description,
-            style: const TextStyle(color: white75, fontSize: 12),
-          ),
-          trailing: Wrap(
-            spacing: 5.0,  // Espaço entre os ícones
+        Container(
+          padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+          height: 60,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(
-                width: 30.0,
-                child: IconButton(
-                  padding: const EdgeInsets.all(4.0),  // Reduz o padding do botão
-                  icon: const Icon(Icons.call, color: white85),
-                  onPressed: () {
-                    // Código para ligar
-                  },
+              CircleAvatar(
+                backgroundImage: AssetImage(friend.photo),
+                radius: 23,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 15.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        friend.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
+                      ),
+                      Text(
+                        friend.status,
+                        style: const TextStyle(color: white75),
+                        overflow: TextOverflow.clip,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              SizedBox(
-                width: 30.0,
-                child: IconButton(
-                  padding: const EdgeInsets.all(4.0),  // Reduz o padding do botão
-                  icon: const Icon(Icons.chat, color: white85),
-                  onPressed: () {
-                    // Código para abrir chat
-                  },
-                ),
-              ),
+              Row(
+                children: [
+                  const SizedBox(width: 10),
+                  Material(
+                    color: dark2_75,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      highlightColor: primary4,
+                      splashColor: primary4,
+                      customBorder: const CircleBorder(),
+                      onTap: () {
+                        // TODO: Função para fazer ligação
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(Icons.call, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10), // Espaço entre os botões
+                  Material(
+                    color: dark2_75,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      highlightColor: primary4,
+                      splashColor: primary4,
+                      customBorder: const CircleBorder(),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatScreen(friend: friend),
+                          ),
+                        );
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(Icons.chat, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              )
             ],
           ),
         ),
-        if (!isLast) 
-          Divider(color: Colors.white.withOpacity(0.2), thickness: 0.5),
+        if (!isLast)
+          Padding(
+            padding: const EdgeInsets.only(left: 65.0),
+            child: Divider(color: Colors.white.withOpacity(0.2)),
+          ),
       ],
     );
   }
 }
 
 class FriendsList extends StatelessWidget {
-  final List<Friend> friends = [
-    Friend(
-        name: 'AlexM_92',
-        description: 'Café na mão, fone no ouvido. Let\'s code!',
-        imageUrl: 'assets/faces/alex.png',
-        isOnline: true),
-    Friend(
-        name: 'ClaraFields',
-        description: 'No modo "Não Perturbe". Deadline chegando!',
-        imageUrl: 'assets/faces/clara.png',
-        isOnline: false),
-    Friend(
-        name: 'BrianTech',
-        description: 'Deep dive em documentação. Send help!',
-        imageUrl: 'assets/faces/brian.png',
-        isOnline: true),
-    Friend(
-        name: 'SarahLopez',
-        description: 'Almoço prolongado. De volta às 15h.',
-        imageUrl: 'assets/faces/sarah.png',
-        isOnline: false),
-    Friend(
-        name: 'MichaelT',
-        description: 'Early bird gets the worm. Ou o código, no meu caso.',
-        imageUrl: 'assets/faces/michael.png',
-        isOnline: true),
-    Friend(
-        name: 'JasmineF',
-        description: 'Entre uma reunião e outra. Disponível em 10 min.',
-        imageUrl: 'assets/faces/jasmine.png',
-        isOnline: true),
-    Friend(
-        name: 'EdwardS',
-        description: 'Brainstorming com o time. Vamos inovar!',
-        imageUrl: 'assets/faces/edward.png',
-        isOnline: false),
-    Friend(
-        name: 'NinaParker',
-        description: 'Dia produtivo! Offline até amanhã.',
-        imageUrl: 'assets/faces/nina.png',
-        isOnline: false),
-    Friend(
-        name: 'ChatGPT',
-        description: 'Sempre online para ajudar!',
-        imageUrl: 'assets/faces/gpt.png',
-        isOnline: true),
-    Friend(
-        name: 'Tospericargerja',
-        description: 'Brasil Tri campeao!',
-        imageUrl: 'assets/faces/Tospericargerja.png',
-        isOnline: false),
-  ];
+  final List<Friend> friends;
 
-  int countOnline() {
-    return friends.where((friend) => friend.isOnline).length;
-  }
-
-  int countOffline() {
-    return friends.where((friend) => !friend.isOnline).length;
-  }
-
-  FriendsList({super.key});
+  FriendsList({required this.friends});
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +178,7 @@ class FriendsList extends StatelessWidget {
       children: [
         ListTile(
           title: Text(
-            'Online — ${countOnline()}',
+            'Online — ${onlineFriends.length}',
             style: const TextStyle(
                 color: Colors.white, fontWeight: FontWeight.bold),
           ),
@@ -198,7 +189,7 @@ class FriendsList extends StatelessWidget {
             .toList(),
         ListTile(
           title: Text(
-            'Offline — ${countOffline()}',
+            'Offline — ${offlineFriends.length}',
             style: const TextStyle(
                 color: Colors.white, fontWeight: FontWeight.bold),
           ),

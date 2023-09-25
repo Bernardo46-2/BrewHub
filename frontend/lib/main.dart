@@ -1,9 +1,19 @@
+import 'package:brewhub/models/friend.dart';
 import 'package:brewhub/style.dart';
 import 'package:flutter/material.dart';
 import 'package:brewhub/welcome/welcome.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const BrewHub());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => FriendsProvider()), // Crie uma instância do FriendsProvider
+        // Adicione outros providers, se necessário
+      ],
+      child: const BrewHub(),
+    ),
+  );
 }
 
 class BrewHub extends StatelessWidget {

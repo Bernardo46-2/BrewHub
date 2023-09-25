@@ -1,12 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:brewhub/style.dart';
 import 'package:brewhub/home/navigation.dart';
+import 'package:brewhub/models/friend.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPage();
+}
+
+void onLoginSuccess(BuildContext ctx) {
+  final friendsProvider = Provider.of<FriendsProvider>(ctx, listen: false);
+
+  // Defina a lista de amigos no FriendsProvider.
+  friendsProvider.friends = loadUserFriends();
+
+  // Navegue para a página FriendsPage.
+  Navigator.of(ctx).push(
+    MaterialPageRoute(
+      builder: (ctx) => const Navigation(),
+    ),
+  );
 }
 
 class _LoginPage extends State<LoginPage> {
@@ -154,11 +170,7 @@ class _LoginPage extends State<LoginPage> {
                                     fadingImageKey.currentState?.fadeIn();
                                     _imgHidden = false;
                                   } else {
-                                    Navigator.of(ctx).push(
-                                      MaterialPageRoute(
-                                        builder: (ctx) => const Navigation(),
-                                      ),
-                                    );
+                                    onLoginSuccess(ctx);
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
