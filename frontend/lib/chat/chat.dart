@@ -119,7 +119,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       );
                     }
                     return const Center(
-                        child: Text('Nenhuma mensagem disponível.'));
+                      child: Text(
+                        'Nenhuma mensagem disponível.',
+                        style: TextStyle(color: white50),
+                      ),
+                    );
                   },
                 ),
               ),
