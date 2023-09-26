@@ -27,7 +27,7 @@ class _SettingsPage extends State<SettingsPage> {
               );
             },
             child: const Text(
-              "About",
+              "Sobre",
               style: TextStyle(
                 color: Colors.white, // Customize the button text color.
               ),
