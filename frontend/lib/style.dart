@@ -70,9 +70,9 @@ Opacity backgroundWelcome(BuildContext ctx) {
 
 Opacity backgroundHome(BuildContext ctx) {
   return Opacity(
-    opacity: 1,
+    opacity: 0.3,
     child: Image.asset(
-      'assets/homeBg.jpg',
+      'assets/doodle.png',
       fit: BoxFit.cover,
       alignment: const Alignment(-.5, 0),
       width: MediaQuery.of(ctx).size.width,

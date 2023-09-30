@@ -1,14 +1,14 @@
 import 'package:brewhub/style.dart';
 import 'package:flutter/material.dart';
 
-class FeedPage extends StatefulWidget {
-  const FeedPage({super.key});
+class ChatListPage extends StatefulWidget {
+  const ChatListPage({super.key});
 
   @override
-  State<FeedPage> createState() => _FeedPage();
+  State<ChatListPage> createState() => _ChatListPage();
 }
 
-class _FeedPage extends State<FeedPage> {
+class _ChatListPage extends State<ChatListPage> {
   @override
   Widget build(BuildContext ctx) {
     return Scaffold(
@@ -16,7 +16,7 @@ class _FeedPage extends State<FeedPage> {
       body: Stack(
         children: <Widget>[
           backgroundHome(ctx),
-          const Center(child: Text("Feed")),
+          const Center(child: Text("Conversas")),
         ],
       ),
     );

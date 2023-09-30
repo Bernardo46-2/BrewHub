@@ -27,7 +27,7 @@ flutter:
     - assets/google.png
     - assets/brewhub.png
     - assets/brewhub_logo.png
-    - assets/homeBg.jpg
+    - assets/doodle.png
     - assets/faces/alex.png
     - assets/faces/clara.png
     - assets/faces/brian.png
@@ -38,3 +38,6 @@ flutter:
     - assets/faces/nina.png
     - assets/faces/gpt.png
     - assets/faces/Tospericargerja.png
+    - assets/hub/hub1.png
+    - assets/hub/hub2.png
+    - assets/hub/hub3.png

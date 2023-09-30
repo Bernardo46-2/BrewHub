@@ -1,7 +1,6 @@
 import 'package:brewhub/home/friends.dart';
-import 'package:brewhub/home/hub.dart';
-import 'package:brewhub/home/notifications.dart';
-import 'package:brewhub/home/feed.dart';
+import 'package:brewhub/home/hubs.dart';
+import 'package:brewhub/home/chat_list.dart';
 import 'package:brewhub/home/settings.dart';
 import 'package:brewhub/style.dart';
 import 'package:flutter/material.dart';
@@ -18,10 +17,9 @@ class _Nav extends State<Navigation> {
   int _currentIndex = 0;
 
   final List<Widget> pages = [
-    const FriendsPage(),
     const HubPage(),
-    const NotificationsPage(),
-    const FeedPage(),
+    const FriendsPage(),
+    const ChatListPage(),
     const SettingsPage(),
   ];
 
@@ -32,11 +30,11 @@ class _Nav extends State<Navigation> {
       const SystemUiOverlayStyle(
         systemNavigationBarColor: dark3,
         systemNavigationBarIconBrightness: Brightness.light,
-        statusBarColor: Colors.transparent, 
+        statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
       ),
     );
-    
+
     return Scaffold(
       body: pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -51,23 +49,18 @@ class _Nav extends State<Navigation> {
         items: const [
           BottomNavigationBarItem(
             backgroundColor: dark3,
-            icon: Icon(Icons.people),
-            label: 'Amigos',
-          ),
-          BottomNavigationBarItem(
-            backgroundColor: dark3,
             icon: Icon(Icons.coffee),
             label: 'Hub',
           ),
           BottomNavigationBarItem(
             backgroundColor: dark3,
-            icon: Icon(Icons.notifications),
-            label: 'Notificações',
+            icon: Icon(Icons.people),
+            label: 'Amigos',
           ),
           BottomNavigationBarItem(
             backgroundColor: dark3,
-            icon: Icon(Icons.timeline),
-            label: 'Feed',
+            icon: Icon(Icons.chat_bubble),
+            label: 'Conversas',
           ),
           BottomNavigationBarItem(
             backgroundColor: dark3,

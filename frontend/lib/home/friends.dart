@@ -167,7 +167,7 @@ class FriendTile extends StatelessWidget {
 class FriendsList extends StatelessWidget {
   final List<Friend> friends;
 
-  FriendsList({required this.friends});
+  const FriendsList({super.key, required this.friends});
 
   @override
   Widget build(BuildContext context) {
