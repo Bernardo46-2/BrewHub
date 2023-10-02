@@ -1,0 +1,35 @@
+{ "columns":12,
+ "image":"forest_ [resources].png",
+ "imageheight":160,
+ "imagewidth":192,
+ "margin":0,
+ "name":"forest_ [resources]",
+ "spacing":0,
+ "tilecount":120,
+ "tiledversion":"1.10.2",
+ "tileheight":16,
+ "tiles":[
+        {
+         "animation":[
+                {
+                 "duration":200,
+                 "tileid":103
+                }, 
+                {
+                 "duration":200,
+                 "tileid":104
+                }, 
+                {
+                 "duration":200,
+                 "tileid":105
+                }, 
+                {
+                 "duration":200,
+                 "tileid":106
+                }],
+         "id":103
+        }],
+ "tilewidth":16,
+ "type":"tileset",
+ "version":"1.10"
+}

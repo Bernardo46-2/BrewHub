@@ -1,3 +1,4 @@
+import 'package:brewhub/game/game.dart';
 import 'package:brewhub/style.dart';
 import 'package:flutter/material.dart';
 
@@ -10,7 +11,7 @@ class HubPage extends StatefulWidget {
 
 class _HubPageState extends State<HubPage> {
   @override
-  Widget build(BuildContext ctx) {
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: dark3,
@@ -36,11 +37,11 @@ class _HubPageState extends State<HubPage> {
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: <Widget>[
-          backgroundHome(ctx),
+          backgroundHome(context),
           ListView.builder(
             padding: const EdgeInsets.all(20),
             itemCount: hubs.length,
-            itemBuilder: (ctx, index) => HubBlock(hub: hubs[index]),
+            itemBuilder: (context, index) => HubBlock(hub: hubs[index]),
           ),
         ],
       ),
@@ -105,7 +106,8 @@ class HubBlock extends StatelessWidget {
                           margin: const EdgeInsets.only(top: 12),
                           child: Text(
                             hub.name,
-                            style: const TextStyle(color: Colors.white, fontSize: 30),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 30),
                           ),
                         ),
                         const SizedBox(height: 5),
@@ -130,7 +132,13 @@ class HubBlock extends StatelessWidget {
                           splashColor: primary6,
                           borderRadius: BorderRadius.circular(8),
                           onTap: () {
-                            print("Entrar no hub");
+                            // Navegue para a página FriendsPage.
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const MyGame(),
+                              ),
+                            );
+                            const MyGame();
                           },
                           child: Container(
                             margin: const EdgeInsets.all(10),

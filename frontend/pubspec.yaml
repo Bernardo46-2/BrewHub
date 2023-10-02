@@ -16,7 +16,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  bonfire: ^2.12.8
   flutter_lints: ^2.0.0
 
 flutter:
@@ -41,3 +41,5 @@ flutter:
     - assets/hub/hub1.png
     - assets/hub/hub2.png
     - assets/hub/hub3.png
+    - assets/images/
+    - assets/images/map/
