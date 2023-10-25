@@ -10,13 +10,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  bonfire: ^2.12.8
   provider: ^6.0.5
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  bonfire: ^2.12.8
   flutter_lints: ^2.0.0
 
 flutter:
@@ -43,3 +43,5 @@ flutter:
     - assets/hub/hub3.png
     - assets/images/
     - assets/images/map/
+    - assets/images/fPlayer_elf.png
+    

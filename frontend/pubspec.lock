@@ -18,7 +18,7 @@ packages:
     source: hosted
     version: "2.11.0"
   bonfire:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: bonfire
       sha256: "0333594472cd448e1a11edf0461e9015290e1a273bc6a6f757016878b9d7c1c2"

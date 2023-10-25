@@ -3,6 +3,7 @@ import 'package:brewhub/game/bonfire_override/my_joystick.dart';
 import 'package:brewhub/game/bonfire_override/my_joystick_directional.dart';
 import 'package:brewhub/style.dart';
 import 'package:flutter/material.dart';
+import 'package:brewhub/game/brewhub_player.dart';
 
 class MyGame extends StatelessWidget {
   const MyGame({Key? key}) : super(key: key);
@@ -19,8 +20,10 @@ class MyGame extends StatelessWidget {
             ),
             map: WorldMapByTiled(
               'map/mapa.tmj',
-              forceTileSize: Vector2(32, 32),
+              forceTileSize: Vector2(48, 48),
             ),
+            player: BrewHubPlayer(Vector2(18*32, 14*32)),
+            showCollisionArea: false,
           ),
 
           // Barra inferior
