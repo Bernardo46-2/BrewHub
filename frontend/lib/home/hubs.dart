@@ -28,7 +28,7 @@ class _HubPageState extends State<HubPage> {
             child: IconButton(
               icon: const Icon(Icons.person_add, color: Colors.white),
               onPressed: () {
-                print("adicionar hub");
+                // TODO: Botão de adicionar HUB
               },
             ),
           ),

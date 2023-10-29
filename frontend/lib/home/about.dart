@@ -27,54 +27,46 @@ class _AboutPage extends State<AboutPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  'assets/brewhub_logo.png', // Replace with the actual path to your image.
-                  width: 100, // Set the width of the image as needed.
-                  height: 100, // Set the height of the image as needed.
+                  'assets/brewhub_logo.png',
+                  width: 100,
+                  height: 100,
                 ),
                 Container(
-                  padding: const EdgeInsets.all(
-                      20.0), // Add padding to create a block-like appearance.
-                  alignment: Alignment.center, // Center the text.
+                  padding: const EdgeInsets.all(20.0),
+                  alignment: Alignment.center,
                   child: const Text(
                     "O BrewHub é uma plataforma gamificada de escritório virtual, inspirada na atmosfera de cafés coworking, que visa proporcionar um ambiente virtual colaborativo e descontraído.",
                     style: TextStyle(
-                      fontSize: 18, // Customize the font size.
+                      fontSize: 18,
                       color: Colors.white,
                     ),
-                    textAlign: TextAlign.left, // Center the text leftsie.
+                    textAlign: TextAlign.left,
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.all(
-                      20.0), // Add padding to create a block-like appearance.
-                  alignment: Alignment.center, // Center the text.
+                  padding: const EdgeInsets.all(20.0),
+                  alignment: Alignment.center,
                   child: const Text(
                     "Sua finalidade principal é reaproximar trabalhadores em home office, especialmente programadores e entusiastas da tecnologia, em um espaço digital onde podem trabalhar, se conectar e relaxar, combinando elementos de trabalho e lazer em um único ambiente.",
                     style: TextStyle(
-                      fontSize: 18, // Customize the font size.
+                      fontSize: 18,
                       color: Colors.white,
                     ),
-                    textAlign: TextAlign.left, // Center the text leftsie.
+                    textAlign: TextAlign.left,
                   ),
                 ),
-                const SizedBox(height: 20.0), // Add space between text blocks.
+                const SizedBox(height: 20.0),
                 const Text(
                   "Carefully crafted by",
-                  style: TextStyle(
-                      fontSize: 18, // Customize the font size.
-                      color: Colors.white),
+                  style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
                 const Text(
                   "Tony LuckyStriker, Rusty B, and Haikai Pepe",
-                  style: TextStyle(
-                      fontSize: 18, // Customize the font size.
-                      color: Colors.white),
+                  style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
                 const Text(
                   "All rights reserved, BrewHub™",
-                  style: TextStyle(
-                      fontSize: 18, // Customize the font size.
-                      color: Colors.white),
+                  style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ],
             ),

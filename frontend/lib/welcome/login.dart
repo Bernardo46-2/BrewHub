@@ -11,19 +11,25 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPage();
 }
 
-void onLoginSuccess(BuildContext ctx) {
+void onLoginSuccess(BuildContext ctx) async {
   final friendsProvider = Provider.of<FriendsProvider>(ctx, listen: false);
+  
+  // Armazene o Navigator antes de operações assíncronas
+  final navigator = Navigator.of(ctx);
 
-  // Defina a lista de amigos no FriendsProvider.
-  friendsProvider.friends = loadUserFriends();
+  // Inicie (ou abra) o banco de dados e crie as tabelas necessárias.
+  await friendsProvider.initializeDatabase();
+  await friendsProvider.checkAndInsertInitialFriends();
 
-  // Navegue para a página FriendsPage.
-  Navigator.of(ctx).push(
+  // Navegue para a página FriendsPage usando a instância armazenada do Navigator.
+  navigator.push(
     MaterialPageRoute(
       builder: (ctx) => const Navigation(),
     ),
   );
 }
+
+
 
 class _LoginPage extends State<LoginPage> {
   static const double componentsWidth = 340;

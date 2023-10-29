@@ -24,12 +24,14 @@ class _ChatScreenState extends State<ChatScreen> {
       StreamController<List<Message>>();
   final ScrollController _listViewController = ScrollController();
   final ChatSimulator chatSimulator = ChatSimulator();
+  StreamSubscription? _messageSubscription;
 
   Future<void> _generateRandomMessages() async {
     final random = Random(DateTime.now().millisecondsSinceEpoch);
 
-    while (true) {
-      await Future.delayed(Duration(seconds: (random.nextInt(12) + 3)));
+    _messageSubscription = Stream.periodic(
+      Duration(seconds: (random.nextInt(12) + 3)),
+    ).listen((_) {
       final randomMessage = Message(
         senderId: '456',
         receiverId: '123',
@@ -38,13 +40,16 @@ class _ChatScreenState extends State<ChatScreen> {
         status: MessageStatus.notSent,
       );
 
-      _messages.insert(0, randomMessage);
-      _messagesStreamController.add(List.from(_messages));
-    }
+      if (!_messagesStreamController.isClosed) {
+        _messages.insert(0, randomMessage);
+        _messagesStreamController.add(List.from(_messages));
+      }
+    });
   }
 
   @override
   void dispose() {
+    _messageSubscription?.cancel();
     _messagesStreamController.close();
     _listViewController.dispose();
     super.dispose();
@@ -66,7 +71,7 @@ class _ChatScreenState extends State<ChatScreen> {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundImage: AssetImage(widget.friend.photo),
+              backgroundImage: widget.friend.getFriendImage(),
               radius: 23,
             ),
             const SizedBox(width: 10),

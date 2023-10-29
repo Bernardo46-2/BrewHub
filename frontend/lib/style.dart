@@ -12,8 +12,10 @@ const Color primary6 = Color(0xFFE1BCAB);
 const Color dark1 = Color(0xFF111314); // For body
 const Color dark2_75 = Color.fromARGB(192, 39, 40, 41); // For cards
 const Color dark2 = Color(0xFF272829); // For cards
-const Color dark3 = Color.fromARGB(255, 49, 50, 51); // For chips buttons, dropdowns
-const Color dark3_50 = Color.fromARGB(128, 49, 50, 51); // For chips buttons, dropdowns
+const Color dark3 =
+    Color.fromARGB(255, 49, 50, 51); // For chips buttons, dropdowns
+const Color dark3_50 =
+    Color.fromARGB(128, 49, 50, 51); // For chips buttons, dropdowns
 const Color dark4 = Color(0xFF565858); // For sidebars, navbar
 const Color dark5 = Color(0xFF707172); // For modal, dialogs
 const Color dark6 = Color(0xFF8B8C8C); // For on texts
@@ -52,6 +54,9 @@ ThemeData brewHubTheme = ThemeData(
     fillColor: dark5,
     filled: true,
     labelStyle: TextStyle(color: Colors.white),
+  ),
+  snackBarTheme: const SnackBarThemeData(
+    backgroundColor: dark3, // Cor de fundo padrão para todos os SnackBars
   ),
 );
 
