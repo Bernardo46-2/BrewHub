@@ -1,2 +1,3 @@
 /backend/target
 /backend/target/debug/deps/*.rmeta
+/frontend/android/app/google-services.json
