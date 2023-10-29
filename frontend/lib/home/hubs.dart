@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:brewhub/game/game.dart';
 import 'package:brewhub/style.dart';
 import 'package:brewhub/models/hub.dart';
@@ -178,8 +180,8 @@ class HubBlock extends StatelessWidget {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         const SnackBar(
-                                          content: Text(
-                                              'Hub excluído com sucesso!'),
+                                          content:
+                                              Text('Hub excluído com sucesso!'),
                                         ),
                                       );
                                       Navigator.of(context).pop();
@@ -363,8 +365,8 @@ class _AddHubModalState extends State<AddHubModal> {
                         name: _nameController.text,
                         imageUrl:
                             'assets/hub/default.png', // Imagem padrão para Hubs
-                        onlineCount: 0, // Inicialmente 0
-                        totalCount: 0, // Inicialmente 0
+                        onlineCount: Random().nextInt(30),
+                        totalCount: 30 + Random().nextInt(20),
                         icon: Icons.business, // ícone padrão
                       );
                       Provider.of<HubsProvider>(context, listen: false)

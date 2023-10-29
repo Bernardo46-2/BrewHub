@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:brewhub/models/icon_utility.dart';
 import 'package:sqflite/sqflite.dart';
@@ -190,24 +192,24 @@ class HubsProvider with ChangeNotifier {
         id: -1,
         name: 'Plannejy',
         imageUrl: 'assets/hub/default.png',
-        onlineCount: 23,
-        totalCount: 70,
+        onlineCount: Random().nextInt(30),
+        totalCount: 30 + Random().nextInt(20),
         icon: Icons.calendar_month,
       ),
       Hub(
         id: -1,
         name: 'Puc - CC',
         imageUrl: 'assets/hub/hub1.png',
-        onlineCount: 23,
-        totalCount: 70,
+        onlineCount: Random().nextInt(30),
+        totalCount: 30 + Random().nextInt(20),
         icon: Icons.school,
       ),
       Hub(
         id: -1,
         name: 'Avião Brutal',
         imageUrl: 'assets/hub/hub2.png',
-        onlineCount: 23,
-        totalCount: 70,
+        onlineCount: Random().nextInt(30),
+        totalCount: 30 + Random().nextInt(20),
         icon: Icons.flight,
       ),
     ];
