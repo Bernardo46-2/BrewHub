@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:brewhub/style.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,22 +15,30 @@ class _RegisterPage extends State<RegisterPage> {
   static const double componentsWidth = 340;
   bool _pwdHidden = true;
   bool _pwdHidden2 = true;
+  final TextEditingController _pwdController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   String email = '';
-  String user = '';
+  String nick = '';
   String pwd = '';
   String pwd2 = '';
 
-  Future<void> registerUser(String email, String password) async {
-    // try {
-    //   UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-    //     email: email,
-    //     password: password,
-    //   );
-    //   print(userCredential.user?.uid);
-    // } catch (e) {
-    //   print(e);
-    // }
+  // TODO: print if email is already in use
+  Future<void> registerUser() async {
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: pwd,
+      );
+      User? user = userCredential.user;
+      await _firestore.collection('users').doc(user?.uid).set({
+        'nick': nick,
+      });
+      print("User created: ${user?.uid}");
+      
+    } catch (e) {
+      print("Register error: $e");
+    }
   }
 
   @override
@@ -123,11 +132,9 @@ class _RegisterPage extends State<RegisterPage> {
                                 if(value == null || value.isEmpty) {
                                   return 'Email não pode ficar vazio';
                                 }
-
-                                if(RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
+                                if(!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$").hasMatch(value)) {
                                   return 'Digite um email válido';
                                 }
-
                                 return null;
                               }
                             ),
@@ -155,7 +162,16 @@ class _RegisterPage extends State<RegisterPage> {
                                 ),
                               ),
                               onSaved: (value) {
-                                user = value ?? user;
+                                nick = value ?? nick;
+                              },
+                              validator: (value) {
+                                if(value == null || value.isEmpty) {
+                                  return 'Usuário não pode ficar vazio';
+                                }
+                                if(!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9._%-]+$").hasMatch(value)) {
+                                  return 'Digite um usuário válido';
+                                }
+                                return null;
                               }
                             ),
                           ),
@@ -167,6 +183,7 @@ class _RegisterPage extends State<RegisterPage> {
                             width: componentsWidth,
                             child: TextFormField(
                               obscureText: _pwdHidden,
+                              controller: _pwdController,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
@@ -196,6 +213,15 @@ class _RegisterPage extends State<RegisterPage> {
                               onSaved: (value) {
                                 pwd = value ?? pwd;
                               },
+                              validator: (value) {
+                                if(value == null || value.isEmpty) {
+                                  return 'Senha não pode ficar vazia';
+                                }
+                                if(!RegExp(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$").hasMatch(value)) {
+                                  return 'A senha deve ter no mínimo 8 caracteres, uma letra maiúscula, uma minúscula e um número';
+                                }
+                                return null;
+                              }
                             ),
                           ), 
                         ),
@@ -235,6 +261,15 @@ class _RegisterPage extends State<RegisterPage> {
                               onSaved: (value) {
                                 pwd2 = value ?? pwd2;
                               },
+                              validator: (value) {
+                                if(value == null || value.isEmpty) {
+                                  return 'Senha não pode ficar vazia';
+                                }
+                                if(value != _pwdController.text) {
+                                  return 'Confirmação de senha incorreta';
+                                }
+                                return null;
+                              }
                             ),
                           ), 
                         ),
@@ -263,7 +298,7 @@ class _RegisterPage extends State<RegisterPage> {
                                 onPressed: () {
                                   if(_formKey.currentState != null && _formKey.currentState!.validate()) {
                                     _formKey.currentState!.save();
-                                    registerUser(email, pwd);
+                                    registerUser();
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
