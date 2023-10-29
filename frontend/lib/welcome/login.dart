@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:brewhub/style.dart';
 import 'package:brewhub/home/navigation.dart';
 import 'package:brewhub/models/friend.dart';
+import 'package:brewhub/models/hub.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -12,24 +13,25 @@ class LoginPage extends StatefulWidget {
 }
 
 void onLoginSuccess(BuildContext ctx) async {
-  final friendsProvider = Provider.of<FriendsProvider>(ctx, listen: false);
-  
-  // Armazene o Navigator antes de operações assíncronas
+  // Armazene as referências antes das operações assíncronas
   final navigator = Navigator.of(ctx);
+  final friendsProvider = Provider.of<FriendsProvider>(ctx, listen: false);
+  final hubsProvider = Provider.of<HubsProvider>(ctx, listen: false);
 
-  // Inicie (ou abra) o banco de dados e crie as tabelas necessárias.
+  // Inicialização dos Friends
   await friendsProvider.initializeDatabase();
   await friendsProvider.checkAndInsertInitialFriends();
 
-  // Navegue para a página FriendsPage usando a instância armazenada do Navigator.
+  // Inicialização dos hubs
+  await hubsProvider.initializeDatabase();
+  await hubsProvider.checkAndInsertInitialHubs();
+
   navigator.push(
     MaterialPageRoute(
       builder: (ctx) => const Navigation(),
     ),
   );
 }
-
-
 
 class _LoginPage extends State<LoginPage> {
   static const double componentsWidth = 340;
@@ -107,7 +109,7 @@ class _LoginPage extends State<LoginPage> {
                           style: const TextStyle(
                               color: Colors.white, fontSize: 18, height: .7),
                           decoration: InputDecoration(
-                            labelText: 'E-mail ou número de telefone',
+                            labelText: 'Email',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
