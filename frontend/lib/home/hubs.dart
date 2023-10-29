@@ -1,15 +1,23 @@
 import 'package:brewhub/game/game.dart';
 import 'package:brewhub/style.dart';
+import 'package:brewhub/models/hub.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HubPage extends StatefulWidget {
-  const HubPage({super.key});
+  const HubPage({Key? key}) : super(key: key);
 
   @override
   State<HubPage> createState() => _HubPageState();
 }
 
 class _HubPageState extends State<HubPage> {
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<HubsProvider>(context, listen: false).fetchAndSetHubs();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +36,10 @@ class _HubPageState extends State<HubPage> {
             child: IconButton(
               icon: const Icon(Icons.person_add, color: Colors.white),
               onPressed: () {
-                // TODO: Botão de adicionar HUB
+                showDialog(
+                  context: context,
+                  builder: (context) => const AddHubModal(),
+                );
               },
             ),
           ),
@@ -40,8 +51,9 @@ class _HubPageState extends State<HubPage> {
           backgroundHome(context),
           ListView.builder(
             padding: const EdgeInsets.all(20),
-            itemCount: hubs.length,
-            itemBuilder: (context, index) => HubBlock(hub: hubs[index]),
+            itemCount: Provider.of<HubsProvider>(context).hubs.length,
+            itemBuilder: (context, index) =>
+                HubBlock(hub: Provider.of<HubsProvider>(context).hubs[index]),
           ),
         ],
       ),
@@ -69,7 +81,7 @@ class HubBlock extends StatelessWidget {
             child: SizedBox(
               height: 170, // Altura ajustada
               child: Image.asset(
-                hub.imagePath,
+                hub.imageUrl,
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),
@@ -174,42 +186,132 @@ class HubBlock extends StatelessWidget {
   }
 }
 
-class Hub {
-  final String name;
-  final String imagePath;
-  final int onlineCount;
-  final int totalCount;
-  final IconData icon;
+class AddHubModal extends StatefulWidget {
+  const AddHubModal({super.key});
 
-  Hub({
-    required this.name,
-    required this.imagePath,
-    required this.onlineCount,
-    required this.totalCount,
-    required this.icon,
-  });
+  @override
+  State<AddHubModal> createState() => _AddHubModalState();
 }
 
-final hubs = [
-  Hub(
-    name: 'Exemplo Hub 1',
-    imagePath: 'assets/hub/hub1.png',
-    onlineCount: 23,
-    totalCount: 70,
-    icon: Icons.business,
-  ),
-  Hub(
-    name: 'Exemplo Hub 2',
-    imagePath: 'assets/hub/hub2.png',
-    onlineCount: 23,
-    totalCount: 70,
-    icon: Icons.business,
-  ),
-  Hub(
-    name: 'Exemplo Hub 3',
-    imagePath: 'assets/hub/hub3.png',
-    onlineCount: 23,
-    totalCount: 70,
-    icon: Icons.business,
-  ),
-];
+class _AddHubModalState extends State<AddHubModal> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _idController = TextEditingController();
+  String? errorMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: dark3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(top: 3, bottom: 18),
+              child: Text(
+                'Adicionar Hub',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: white85,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            // Para o campo "Nome do Hub":
+            TextField(
+              controller: _nameController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.group, color: Colors.white), // Ícone de grupo
+                labelText: 'Nome do Hub',
+                labelStyle: const TextStyle(color: white75),
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
+                ),
+                fillColor: dark2_75,
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Para o campo "ID do Hub":
+            TextField(
+              controller: _idController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.tag, color: Colors.white), // Ícone '#'
+                labelText: 'ID do Hub',
+                labelStyle: const TextStyle(color: white75),
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
+                ),
+                fillColor: dark2_75,
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            if (errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  errorMessage!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              )
+            else
+              const SizedBox.shrink(),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primary1,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Text('Adicionar'),
+                onPressed: () {
+                  if (_nameController.text.isNotEmpty &&
+                      _idController.text.isNotEmpty) {
+                    final hubId = int.tryParse(_idController.text);
+                    if (hubId != null) {
+                      final newHub = Hub(
+                        id: hubId,
+                        name: _nameController.text,
+                        imageUrl: 'assets/hub/default.png', // Imagem padrão para Hubs
+                        onlineCount: 0, // Inicialmente 0
+                        totalCount: 0,  // Inicialmente 0
+                        icon: Icons.business, // ícone padrão
+                      );
+                      Provider.of<HubsProvider>(context, listen: false).addHub(newHub);
+                      setState(() {
+                        errorMessage = null;
+                      });
+                      Navigator.of(context).pop();
+                    } else {
+                      setState(() {
+                        errorMessage = 'ID do Hub inválido!';
+                      });
+                    }
+                  } else {
+                    setState(() {
+                      errorMessage = 'Ambos os campos são obrigatórios!';
+                    });
+                  }
+                },
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}

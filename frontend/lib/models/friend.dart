@@ -113,7 +113,7 @@ class FriendsProvider with ChangeNotifier {
         await db.rawQuery('SELECT COUNT(*) FROM friends'));
 
     if (count == 0) {
-      _insertInitialFriends(); // Se estiver vazia, insere os amigos iniciais
+      await _insertInitialFriends(); // Se estiver vazia, insere os amigos iniciais
     }
   }
 
@@ -189,7 +189,7 @@ class FriendsProvider with ChangeNotifier {
         await db.rawQuery('SELECT COUNT(*) FROM friends'))!;
   }
 
-  void _insertInitialFriends() async {
+  Future<void> _insertInitialFriends() async {
     final db = await database;
 
     // Lista de amigos para serem inseridos

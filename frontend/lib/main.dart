@@ -1,4 +1,5 @@
 import 'package:brewhub/models/friend.dart';
+import 'package:brewhub/models/hub.dart';
 import 'package:brewhub/style.dart';
 import 'package:flutter/material.dart';
 import 'package:brewhub/welcome/welcome.dart';
@@ -8,8 +9,8 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => FriendsProvider()), // Crie uma instância do FriendsProvider
-        // Adicione outros providers, se necessário
+        ChangeNotifierProvider(create: (context) => FriendsProvider()),
+        ChangeNotifierProvider(create: (context) => HubsProvider()),
       ],
       child: const BrewHub(),
     ),

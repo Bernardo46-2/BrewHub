@@ -32,9 +32,9 @@ flutter:
     - assets/brewhub_logo.png
     - assets/doodle.png
     - assets/faces/default.png
+    - assets/hub/default.png
     - assets/hub/hub1.png
     - assets/hub/hub2.png
-    - assets/hub/hub3.png
     - assets/images/
     - assets/images/map/
     - assets/images/fPlayer_elf.png
