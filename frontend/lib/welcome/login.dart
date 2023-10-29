@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:brewhub/style.dart';
 import 'package:brewhub/home/navigation.dart';
@@ -12,40 +13,52 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPage();
 }
 
-void onLoginSuccess(BuildContext ctx) async {
-  // Armazene as referências antes das operações assíncronas
-  final navigator = Navigator.of(ctx);
-  final friendsProvider = Provider.of<FriendsProvider>(ctx, listen: false);
-  final hubsProvider = Provider.of<HubsProvider>(ctx, listen: false);
-
-  // Inicialização dos Friends
-  await friendsProvider.initializeDatabase();
-  await friendsProvider.checkAndInsertInitialFriends();
-
-  // Inicialização dos hubs
-  await hubsProvider.initializeDatabase();
-  await hubsProvider.checkAndInsertInitialHubs();
-
-  navigator.push(
-    MaterialPageRoute(
-      builder: (ctx) => const Navigation(),
-    ),
-  );
-}
-
 class _LoginPage extends State<LoginPage> {
   static const double componentsWidth = 340;
   bool _pwdHidden = true;
   bool _imgHidden = true;
   final GlobalKey<_FadingImageState> fadingImageKey = GlobalKey();
-  final TextEditingController _emailTextController = TextEditingController();
-  final TextEditingController _pwdTextController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String _email = '';
+  String _pwd = '';
 
-  @override
-  void dispose() {
-    _emailTextController.dispose();
-    _pwdTextController.dispose();
-    super.dispose();
+  Future<bool> tryLoginUser() async {
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _email, 
+        password: _pwd
+      );
+      print("User logged in: ${userCredential.user?.uid}");
+      return true;
+    } catch(e) {
+      print("Login error: $e");
+      return false;
+    }
+  }
+
+  void loginUser(BuildContext ctx) async {
+    // Armazene as referências antes das operações assíncronas
+    final navigator = Navigator.of(ctx);
+    final friendsProvider = Provider.of<FriendsProvider>(ctx, listen: false);
+    final hubsProvider = Provider.of<HubsProvider>(ctx, listen: false);
+
+    if(await tryLoginUser()) {
+      // Inicialização dos Friends
+      await friendsProvider.initializeDatabase();
+      await friendsProvider.checkAndInsertInitialFriends();
+
+      // Inicialização dos hubs
+      await hubsProvider.initializeDatabase();
+      await hubsProvider.checkAndInsertInitialHubs();
+
+      navigator.push(
+        MaterialPageRoute(
+          builder: (ctx) => const Navigation(),
+        ),
+      );
+    } else {
+      // TODO: display login error
+    }
   }
 
   @override
@@ -100,97 +113,124 @@ class _LoginPage extends State<LoginPage> {
                                 ))
                           ])),
                   const SizedBox(height: 5),
-                  Opacity(
-                    opacity: .85,
-                    child: SizedBox(
-                      width: componentsWidth,
-                      child: TextField(
-                          controller: _emailTextController,
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 18, height: .7),
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.account_circle_rounded,
-                                color: Colors.white),
-                          )),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Opacity(
-                    opacity: .85,
-                    child: SizedBox(
-                      width: componentsWidth,
-                      child: TextField(
-                          controller: _pwdTextController,
-                          obscureText: _pwdHidden,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            height: .7,
-                          ),
-                          decoration: InputDecoration(
-                            labelText: 'Senha',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon:
-                                const Icon(Icons.lock, color: Colors.white),
-                            suffixIcon: IconButton(
-                                icon: Icon(
-                                    _pwdHidden
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
-                                    color: Colors.white),
-                                onPressed: () {
-                                  setState(() {
-                                    _pwdHidden = !_pwdHidden;
-                                  });
-                                }),
-                          )),
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  GestureDetector(
-                    onTap: () {
-                      // TODO: handle forgot password
-                    },
-                    child: const SizedBox(
-                        width: componentsWidth,
-                        child: Text('Esqueceu sua senha?',
-                            style: TextStyle(color: feedbackBlue))),
-                  ),
-                  const SizedBox(height: 15),
-                  SizedBox(
-                      width: componentsWidth,
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            ElevatedButton(
-                                onPressed: () {
-                                  // TODO: handle login
-                                  final String e = _emailTextController.text;
-                                  final String p = _pwdTextController.text;
-
-                                  if (_imgHidden && e == '' && p == 'doggo') {
-                                    fadingImageKey.currentState?.fadeIn();
-                                    _imgHidden = false;
-                                  } else {
-                                    onLoginSuccess(ctx);
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  minimumSize: const Size(componentsWidth, 40),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10)),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        Opacity(
+                          opacity: .85,
+                          child: SizedBox(
+                            width: componentsWidth,
+                            child: TextFormField(
+                              style: const TextStyle(
+                                color: Colors.white, fontSize: 18, height: .7),
+                              decoration: InputDecoration(
+                                labelText: 'Email',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: const Text('Login',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ))),
-                          ])),
+                                prefixIcon: const Icon(Icons.account_circle_rounded, color: Colors.white),
+                              ),
+                              onSaved: (value) {
+                                _email = value ?? _email;
+                              },
+                              validator: (value) {
+                                if(value == '') {
+                                  return null;
+                                }
+                                if(value != null && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$").hasMatch(value)) {
+                                  return 'Digite um email válido';
+                                }
+                                return null;
+                              }
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Opacity(
+                          opacity: .85,
+                          child: SizedBox(
+                            width: componentsWidth,
+                            child: TextFormField(
+                              obscureText: _pwdHidden,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                height: .7,
+                              ),
+                              decoration: InputDecoration(
+                                labelText: 'Senha',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                prefixIcon:
+                                  const Icon(Icons.lock, color: Colors.white),
+                                suffixIcon: IconButton(
+                                  icon: Icon(_pwdHidden ? Icons.visibility : Icons.visibility_off, color: Colors.white),
+                                  onPressed: () {
+                                    setState(() {
+                                      _pwdHidden = !_pwdHidden;
+                                    });
+                                  }
+                                ),
+                              ),
+                              onSaved: (value) {
+                                _pwd = value ?? _pwd;
+                              },
+                              validator: (value) {
+                                if(value == null || value.isEmpty) {
+                                  return 'Senha não pode ficar vazia';
+                                }
+                                if(value != 'doggo' && !RegExp(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$").hasMatch(value)) {
+                                  return 'A senha deve ter no mínimo 8 caracteres, uma letra maiúscula, uma minúscula e um número';
+                                }
+                                return null;
+                              }
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        GestureDetector(
+                          onTap: () {
+                            // TODO: handle forgot password
+                          },
+                          child: const SizedBox(
+                              width: componentsWidth,
+                              child: Text('Esqueceu sua senha?',
+                                  style: TextStyle(color: feedbackBlue))),
+                        ),
+                        const SizedBox(height: 15),
+                        SizedBox(
+                            width: componentsWidth,
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: <Widget>[
+                                  ElevatedButton(
+                                      onPressed: () {
+                                        if(_formKey.currentState != null && _formKey.currentState!.validate()) {
+                                          _formKey.currentState!.save();
+                                          
+                                          if (_imgHidden && _email == '' && _pwd == 'doggo') {
+                                            fadingImageKey.currentState?.fadeIn();
+                                            _imgHidden = false;
+                                          } else {
+                                            loginUser(ctx);
+                                          }
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        minimumSize: const Size(componentsWidth, 40),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(10)),
+                                      ),
+                                      child: const Text('Login',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                          ))),
+                                ])),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 10),
                   SizedBox(
                       width: componentsWidth,

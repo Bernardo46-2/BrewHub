@@ -1,5 +1,7 @@
 import 'package:brewhub/home/about.dart';
 import 'package:brewhub/style.dart';
+import 'package:brewhub/welcome/welcome.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -38,7 +40,23 @@ class _SettingsPage extends State<SettingsPage> {
       body: Stack(
         children: <Widget>[
           backgroundHome(ctx),
-          const Center(child: Text("Settings")),
+          Center(
+            child: Column(
+              children: <Widget>[
+                const Text("Settings"),
+                TextButton(
+                  child:
+                      const Text("Sair", style: TextStyle(color: primary4)),
+                  onPressed: () {
+                    FirebaseAuth.instance.signOut();
+                    Navigator.of(ctx).push(MaterialPageRoute(
+                      builder: (ctx) => const WelcomePage()
+                    ));
+                  },
+                )
+              ]
+            ),
+          ),
         ],
       ),
     );
