@@ -24,7 +24,7 @@ class _HubPageState extends State<HubPage> {
       appBar: AppBar(
         backgroundColor: dark3,
         automaticallyImplyLeading: false,
-        title: const Text("Amigos"),
+        title: const Text("Hubs"),
         actions: [
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
@@ -34,7 +34,7 @@ class _HubPageState extends State<HubPage> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
-              icon: const Icon(Icons.person_add, color: Colors.white),
+              icon: const Icon(Icons.group_add_sharp, color: Colors.white),
               onPressed: () {
                 showDialog(
                   context: context,
@@ -90,6 +90,7 @@ class HubBlock extends StatelessWidget {
           Stack(
             alignment: Alignment.topCenter,
             children: [
+              // A base do container
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(8),
@@ -131,38 +132,110 @@ class HubBlock extends StatelessWidget {
                       ],
                     ),
                     const Spacer(),
-                    Container(
-                      // Adicione este Container
-                      margin: const EdgeInsets.all(12),
-                      child: Material(
-                        color: primary4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: InkWell(
-                          highlightColor: primary6,
-                          splashColor: primary6,
-                          borderRadius: BorderRadius.circular(8),
-                          onTap: () {
-                            // Navegue para a página FriendsPage.
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => const MyGame(),
-                              ),
-                            );
-                            const MyGame();
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.all(10),
-                            child: const Icon(Icons.arrow_forward,
-                                color: Colors.white, size: 24),
-                          ),
-                        ),
-                      ),
-                    )
                   ],
                 ),
               ),
+              Positioned.fill(
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap:
+                        () {}, // Vazio, mas podemos adicionar uma ação se necessário.
+                    onLongPress: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            backgroundColor: dark2,
+                            title: const Text(
+                              "Deletar hub",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            content: const Text(
+                              "Deseja realmente deletar este hub?",
+                              style: TextStyle(color: white75),
+                            ),
+                            actions: [
+                              TextButton(
+                                child: const Text("Cancelar",
+                                    style: TextStyle(color: primary4)),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: TextButton(
+                                  child: const Text("Deletar",
+                                      style: TextStyle(color: Colors.red)),
+                                  onPressed: () {
+                                    final hubsProvider =
+                                        Provider.of<HubsProvider>(context,
+                                            listen: false);
+                                    hubsProvider.deleteHub(hub.id).then((_) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Hub excluído com sucesso!'),
+                                        ),
+                                      );
+                                      Navigator.of(context).pop();
+                                    }).catchError((error) {
+                                      // Manipule o erro aqui, se necessário.
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Hub não excluído: Erro 666'),
+                                        ),
+                                      );
+                                      Navigator.of(context).pop();
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+              // Colocando o botão por cima do InkWell
+              Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  margin: const EdgeInsets.all(24),
+                  child: Material(
+                    color: primary4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: InkWell(
+                      highlightColor: primary6,
+                      splashColor: primary6,
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const MyGame(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.all(10),
+                        child: const Icon(Icons.arrow_forward,
+                            color: Colors.white, size: 24),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Colocando o ícone por cima de tudo
               Align(
                 alignment: const Alignment(-0.9, 0),
                 child: FractionalTranslation(
@@ -228,7 +301,8 @@ class _AddHubModalState extends State<AddHubModal> {
               controller: _nameController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.group, color: Colors.white), // Ícone de grupo
+                prefixIcon: const Icon(Icons.group,
+                    color: Colors.white), // Ícone de grupo
                 labelText: 'Nome do Hub',
                 labelStyle: const TextStyle(color: white75),
                 filled: true,
@@ -245,7 +319,8 @@ class _AddHubModalState extends State<AddHubModal> {
               controller: _idController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.tag, color: Colors.white), // Ícone '#'
+                prefixIcon:
+                    const Icon(Icons.tag, color: Colors.white), // Ícone '#'
                 labelText: 'ID do Hub',
                 labelStyle: const TextStyle(color: white75),
                 filled: true,
@@ -286,12 +361,14 @@ class _AddHubModalState extends State<AddHubModal> {
                       final newHub = Hub(
                         id: hubId,
                         name: _nameController.text,
-                        imageUrl: 'assets/hub/default.png', // Imagem padrão para Hubs
+                        imageUrl:
+                            'assets/hub/default.png', // Imagem padrão para Hubs
                         onlineCount: 0, // Inicialmente 0
-                        totalCount: 0,  // Inicialmente 0
+                        totalCount: 0, // Inicialmente 0
                         icon: Icons.business, // ícone padrão
                       );
-                      Provider.of<HubsProvider>(context, listen: false).addHub(newHub);
+                      Provider.of<HubsProvider>(context, listen: false)
+                          .addHub(newHub);
                       setState(() {
                         errorMessage = null;
                       });
