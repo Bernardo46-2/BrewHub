@@ -3,6 +3,7 @@ import 'package:brewhub/style.dart';
 import 'package:brewhub/welcome/welcome.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -12,7 +13,12 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPage extends State<SettingsPage> {
-  final String _photo = '';
+  static const String _photoUrlKey = 'photoUrl';
+  static const String _nameKey = 'name';
+  static const String _statusKey = 'status';
+  String _photo = '';
+  String _name = 'Sigurd';
+  String _status = 'I work for Belethor, at the General Goods store.';
 
   ImageProvider loadPhotoUrl(String photo) {
     if(photo.startsWith('http')) {
@@ -21,7 +27,24 @@ class _SettingsPage extends State<SettingsPage> {
     return const AssetImage('assets/sigurd.jpeg');
   }
   
-  Widget _buildSettingsItem(IconData icon, String text, void Function() onTap) {
+  Future<void> initValue(void Function(String?) pred, String value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    pred(prefs.getString(value));
+  }
+
+  Future<void> saveValue(void Function() pred, String value, String newValue) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(value, newValue);
+    pred();
+  }
+
+  Future<void> removeValue(void Function() pred, String value) async {
+    pred();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove(value);
+  }
+  
+  Widget _buildSettingsItem(IconData icon, String text, void Function() pred) {
     return ListTile(
       leading: Icon(
         icon, 
@@ -37,8 +60,16 @@ class _SettingsPage extends State<SettingsPage> {
         Icons.chevron_right, 
         color: Colors.white
       ),
-      onTap: onTap
+      onTap: pred
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initValue((value) { _photo = value ?? _photo; }, _photoUrlKey);
+    initValue((value) { _name = value ?? _name; }, _nameKey);
+    initValue((value) { _status = value ?? _status; }, _statusKey);
   }
 
   @override
@@ -79,7 +110,6 @@ class _SettingsPage extends State<SettingsPage> {
                 GestureDetector(
                   child: CircleAvatar(
                     radius: 60,
-                    // TODO: load url from user photo
                     backgroundImage: loadPhotoUrl(_photo),
                   ),
                   onTap: () {
@@ -90,30 +120,48 @@ class _SettingsPage extends State<SettingsPage> {
                         formPlaceholder: 'Url da foto',
                         invalidInputMsg: 'Campo url obrigatório',
                         action: (value) {
-                          // TODO: store new photo
-                        },
+                          setState(() {
+                            saveValue(() { _photo = value; }, _photoUrlKey, value);
+                          });
+                        }
+                      ),
+                    );
+                  },
+                  onLongPress: () {
+                    showDialog(
+                      context: ctx,
+                      builder: (ctx) => ConfirmCancelModal(
+                        title: 'Remover foto?',
+                        action: (_) {
+                          setState(() {
+                            removeValue(() { _photo = ''; }, _photoUrlKey);
+                          });
+                        }
                       ),
                     );
                   }
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'Sigurd',
-                  style: TextStyle(
+                Text(
+                  _name,
+                  style: const TextStyle(
                     fontSize: 18, 
                     fontWeight: FontWeight.bold,
                     color: Colors.white
                   ),
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  'I work for Belethor, at the General Goods store.',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                Text(
+                  _status,
+                  style: const TextStyle(
+                    fontSize: 14, 
+                    color: Colors.grey
+                  ),
                 ),
                 const SizedBox(height: 40),
                 Expanded(
                   child: ListView(
-                    children: [
+                    children: <Widget>[
                       _buildSettingsItem(Icons.person, 'Alterar Nome', () {
                         showDialog(
                           context: ctx,
@@ -122,7 +170,9 @@ class _SettingsPage extends State<SettingsPage> {
                             formPlaceholder: 'Novo nome',
                             invalidInputMsg: 'Campo nome obrigatório',
                             action: (value) {
-                              // TODO: store new name
+                              setState(() {
+                                saveValue(() { _name = value; }, _nameKey, value);
+                              });
                             },
                           ),
                         );
@@ -135,7 +185,9 @@ class _SettingsPage extends State<SettingsPage> {
                             formPlaceholder: 'Novo status',
                             invalidInputMsg: 'Campo status obrigatório',
                             action: (value) {
-                              // TODO: store new status
+                              setState(() {
+                                saveValue(() { _status = value; }, _statusKey, value);
+                              });
                             },
                           ),
                         );
@@ -165,24 +217,22 @@ class ConfirmCancelModal extends StatefulWidget {
   const ConfirmCancelModal({
     Key? key,
     required this.title,
-    required this.formPlaceholder,
+    this.formPlaceholder,
     required this.action,
-    required this.invalidInputMsg
+    this.invalidInputMsg
   }) : super(key: key);
 
   final String title;
-  final String formPlaceholder;
+  final String? formPlaceholder;
   final void Function(String) action;
-  final String invalidInputMsg;
+  final String? invalidInputMsg;
 
   @override
   State<ConfirmCancelModal> createState() => _ConfirmCancelModal();
 }
 
 class _ConfirmCancelModal extends State<ConfirmCancelModal> {
-  _ConfirmCancelModal();
-  
-  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _inputController = TextEditingController();
   String? errorMessage;
   
   @override
@@ -210,8 +260,8 @@ class _ConfirmCancelModal extends State<ConfirmCancelModal> {
                 ),
               ),
             ),
-            TextField(
-              controller: _nameController,
+            if(widget.formPlaceholder != null) TextField(
+              controller: _inputController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.person, color: Colors.white),
@@ -248,11 +298,11 @@ class _ConfirmCancelModal extends State<ConfirmCancelModal> {
                   ),
                   child: const Text('Confirmar'),
                   onPressed: () {
-                    if(_nameController.text.isNotEmpty) {
+                    if(_inputController.text.isNotEmpty || (widget.formPlaceholder == null && widget.invalidInputMsg == null)) {
                       setState(() {
                         errorMessage = null;
                       });
-                      widget.action(_nameController.text);
+                      widget.action(_inputController.text);
                       Navigator.pop(context);
                     } else {
                       setState(() {
