@@ -41,7 +41,7 @@ class _ConversationsPage extends State<ConversationsPage> {
         children: [
           backgroundHome(context),
           if (_isLoading)
-            CircularProgressIndicator()
+            const CircularProgressIndicator()
           else
             Consumer<ConversationProvider>(
               builder: (ctx, conversationProvider, _) {
@@ -51,24 +51,19 @@ class _ConversationsPage extends State<ConversationsPage> {
                         .getConversations(); // Note that this returns a Future
                     final friends = friendsProvider.friends;
 
-                    if (conversationsFuture == null) {
-                      // Handle the case when conversations are not available yet
-                      return CircularProgressIndicator();
-                    }
-
                     return FutureBuilder<List<Conversation>>(
                       future: conversationsFuture,
                       builder: (ctx, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return CircularProgressIndicator();
+                          return const CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return Text('Ocorreu um erro: ${snapshot.error}');
                         } else {
                           final conversations = snapshot.data;
                           if (conversations == null) {
                             // Handle the case when conversations are not available yet
-                            return CircularProgressIndicator();
+                            return const CircularProgressIndicator();
                           }
                           return ConversationsList(
                             conversations: conversations,
