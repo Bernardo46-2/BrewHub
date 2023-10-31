@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 class Conversation {
@@ -29,7 +30,9 @@ class Conversation {
       friendId: map['friendId'],
       lastMessageId: map['lastMessageId'],
       lastMessageText: map['lastMessageText'],
-      lastMessageTimestamp: DateTime.parse(map['lastMessageTimestamp']),
+      lastMessageTimestamp: map['lastMessageTimestamp'] != null
+          ? DateTime.parse(map['lastMessageTimestamp'])
+          : null,
     );
   }
 }
@@ -110,11 +113,16 @@ class Message {
   }
 }
 
-class ConversationProvider {
-  Database? _database;
+class ConversationProvider with ChangeNotifier {
   List<Conversation> _conversations = [];
+  Database? _database;
 
   List<Conversation> get conversations => _conversations;
+
+  set conversations(List<Conversation> conversations) {
+    _conversations = conversations;
+    notifyListeners();
+  }
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -181,16 +189,7 @@ class ConversationProvider {
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-  }
-
-  Future<void> addConversation(Conversation conversation) async {
-    final db = await database;
-
-    await db.insert(
-      'conversations',
-      conversation.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    fetchAndSetConversations();
   }
 
   Future<Message> addMessage(Message message) async {
@@ -215,6 +214,7 @@ class ConversationProvider {
       whereArgs: [message.friendId],
     );
 
+    notifyListeners();
     return Message(
       id: messageId,
       friendId: message.friendId,
@@ -233,6 +233,29 @@ class ConversationProvider {
     _conversations = List.generate(maps.length, (i) {
       return Conversation.fromMap(maps[i]);
     });
+    ChangeNotifier();
+  }
+
+  Future<void> deleteConversation(int friendId) async {
+    final db = await database;
+
+    // Deleta todas as mensagens associadas à conversa
+    await db.delete(
+      'messages',
+      where: 'friendId = ?',
+      whereArgs: [friendId],
+    );
+
+    // Deleta a conversa
+    await db.delete(
+      'conversations',
+      where: 'friendId = ?',
+      whereArgs: [friendId],
+    );
+
+    // Atualiza a lista de conversas no estado
+    fetchAndSetConversations();
+    notifyListeners();
   }
 
   Future<List<Message>> getMessages(int friendId,

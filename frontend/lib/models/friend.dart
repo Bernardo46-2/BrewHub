@@ -293,4 +293,24 @@ class FriendsProvider with ChangeNotifier {
       whereArgs: [friendId],
     );
   }
+
+  Future<Friend?> getFriendById(int id) async {
+    final db = await database;
+    final maps = await db.query(
+      'friends',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return Friend(
+        id: maps[0]['id'] as int,
+        name: maps[0]['name'] as String,
+        status: maps[0]['status'] as String,
+        photo: maps[0]['photo'] as String,
+        isOnline: (maps[0]['isOnline'] as int) == 1,
+      );
+    }
+    return null; // Retorna nulo se o amigo não for encontrado.
+  }
 }

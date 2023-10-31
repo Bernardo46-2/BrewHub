@@ -1,6 +1,8 @@
+import 'package:brewhub/home/navigation.dart';
 import 'package:brewhub/models/friend.dart';
 import 'package:brewhub/models/hub.dart';
 import 'package:brewhub/style.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:brewhub/welcome/welcome.dart';
 import 'package:provider/provider.dart';
@@ -22,15 +24,39 @@ void main() async {
   );
 }
 
-class BrewHub extends StatelessWidget {
+class BrewHub extends StatefulWidget {
   const BrewHub({super.key});
+  
+  @override
+  State<BrewHub> createState() => _BrewHub();
+}
+
+class _BrewHub extends State<BrewHub> {
+  FirebaseAuth auth = FirebaseAuth.instance;
+  bool isLogged = false;
+  
+  Future<void> testLogin() async {
+    auth.authStateChanges().listen((User? user) {
+      if(user != null && mounted) {
+        setState(() {
+          isLogged = true;
+        });
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    testLogin();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'BrewHub',
       theme: brewHubTheme,
-      home: const WelcomePage(),
+      home: isLogged ? const Navigation() : const WelcomePage(),
       debugShowCheckedModeBanner: false,
     );
   }

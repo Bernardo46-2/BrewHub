@@ -7,6 +7,7 @@ import 'package:brewhub/models/friend.dart';
 import 'package:brewhub/models/message.dart';
 import 'package:brewhub/style.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ChatScreen extends StatefulWidget {
   final Friend friend;
@@ -95,6 +96,12 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _printDatabaseTables() async {
+    final conversationProvider =
+        Provider.of<ConversationProvider>(context, listen: false);
+
+    print("conversations = ");
+    print(conversationProvider.conversations);
+
     final db = await _conversationProvider.database;
 
     List<Map<String, dynamic>> messages = await db.query('messages');

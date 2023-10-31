@@ -1,6 +1,6 @@
 import 'package:brewhub/home/friends.dart';
 import 'package:brewhub/home/hubs.dart';
-import 'package:brewhub/home/chat_list.dart';
+import 'package:brewhub/home/conversations.dart';
 import 'package:brewhub/home/settings.dart';
 import 'package:brewhub/style.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +19,7 @@ class _Nav extends State<Navigation> {
   final List<Widget> pages = [
     const HubPage(),
     const FriendsPage(),
-    const ChatListPage(),
+    const ConversationsPage(),
     const SettingsPage(),
   ];
 
