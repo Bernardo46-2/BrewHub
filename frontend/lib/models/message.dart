@@ -1,4 +1,38 @@
+import 'dart:async';
 import 'dart:math';
+import 'package:sqflite/sqflite.dart';
+
+class Conversation {
+  final int friendId;
+  final int? lastMessageId;
+  final String? lastMessageText;
+  final DateTime? lastMessageTimestamp;
+
+  Conversation({
+    required this.friendId,
+    this.lastMessageId,
+    this.lastMessageText,
+    this.lastMessageTimestamp,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'friendId': friendId,
+      'lastMessageId': lastMessageId,
+      'lastMessageText': lastMessageText,
+      'lastMessageTimestamp': lastMessageTimestamp?.toIso8601String(),
+    };
+  }
+
+  static Conversation fromMap(Map<String, dynamic> map) {
+    return Conversation(
+      friendId: map['friendId'],
+      lastMessageId: map['lastMessageId'],
+      lastMessageText: map['lastMessageText'],
+      lastMessageTimestamp: DateTime.parse(map['lastMessageTimestamp']),
+    );
+  }
+}
 
 enum MessageStatus {
   notSent,
@@ -7,42 +41,215 @@ enum MessageStatus {
   read,
 }
 
+enum MessageType {
+  text,
+  audio,
+  image,
+}
+
 class Message {
-  final String senderId;
-  final String receiverId;
-  final String content;
+  final int? id;
+  final int friendId;
+  final int senderId;
+  final String? content;
   final DateTime timestamp;
   final MessageStatus status;
+  final MessageType type;
 
-  // Construtor
   Message({
+    this.id,
+    required this.friendId,
     required this.senderId,
-    required this.receiverId,
-    required this.content,
+    this.content,
     required this.timestamp,
-    this.status = MessageStatus.notSent, // padrão para não enviado
+    required this.status,
+    required this.type,
   });
 
-  // Converter um objeto Message em um mapa para armazenamento ou envio
-  Map<String, dynamic> toJson() {
+  factory Message.withGeneratedId({
+    required int friendId,
+    required int senderId,
+    String? content,
+    required DateTime timestamp,
+    required MessageStatus status,
+    required MessageType type,
+  }) {
+    return Message(
+      id: null, // ID será gerado pelo banco de dados
+      friendId: friendId,
+      senderId: senderId,
+      content: content,
+      timestamp: timestamp,
+      status: status,
+      type: type,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
     return {
+      'id': id,
+      'friendId': friendId,
       'senderId': senderId,
-      'receiverId': receiverId,
       'content': content,
       'timestamp': timestamp.toIso8601String(),
-      'status': status.index, // converte o enum para int
+      'status': status.index,
+      'type': type.index,
     };
   }
 
-  // Converter um mapa em um objeto Message
   static Message fromMap(Map<String, dynamic> map) {
     return Message(
+      id: map['id'],
+      friendId: map['friendId'],
       senderId: map['senderId'],
-      receiverId: map['receiverId'],
       content: map['content'],
       timestamp: DateTime.parse(map['timestamp']),
       status: MessageStatus.values[map['status']],
+      type: MessageType.values[map['type']],
     );
+  }
+}
+
+class ConversationProvider {
+  Database? _database;
+  List<Conversation> _conversations = [];
+
+  List<Conversation> get conversations => _conversations;
+
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = await initializeDatabase();
+    return _database!;
+  }
+
+  Future<Database> initializeDatabase() async {
+    const path = 'conversations.db';
+    return openDatabase(path, version: 1, onCreate: (db, version) async {
+      await db.execute(
+        '''
+        CREATE TABLE conversations(
+          friendId INTEGER PRIMARY KEY NOT NULL,
+          lastMessageId INTEGER, 
+          lastMessageText INTEGER, 
+          lastMessageTimestamp TEXT
+        )
+        ''',
+      );
+
+      await db.execute(
+        '''
+        CREATE TABLE messages(
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          friendId INTEGER,
+          senderId INTEGER,
+          content TEXT,
+          timestamp TEXT,
+          status INTEGER,
+          type INTEGER
+        )
+        ''',
+      );
+    });
+  }
+
+  Future<Conversation?> getConversation(int friendId) async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      'conversations',
+      where: 'friendId = ?',
+      whereArgs: [friendId],
+    );
+
+    if (maps.isNotEmpty) {
+      // Se houver uma conversa existente, retorna a primeira encontrada
+      return Conversation.fromMap(maps.first);
+    }
+    // Se não houver conversa, retorna nulo
+    return null;
+  }
+
+  Future<void> createConversation(int friendId) async {
+    final db = await database;
+    await db.insert(
+      'conversations',
+      {
+        'friendId': friendId,
+        'lastMessageId': null,
+        'lastMessageText': null,
+        'lastMessageTimestamp': null,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> addConversation(Conversation conversation) async {
+    final db = await database;
+
+    await db.insert(
+      'conversations',
+      conversation.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<Message> addMessage(Message message) async {
+    final db = await database;
+
+    // Insere a mensagem no banco de dados e obtém o ID gerado
+    int messageId = await db.insert(
+      'messages',
+      message.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+    // Atualiza o lastMessageId da conversa correspondente
+    await db.update(
+      'conversations',
+      {
+        'lastMessageId': messageId,
+        'lastMessageText': message.content,
+        'lastMessageTimestamp': message.timestamp.toIso8601String(),
+      },
+      where: 'friendId = ?',
+      whereArgs: [message.friendId],
+    );
+
+    return Message(
+      id: messageId,
+      friendId: message.friendId,
+      senderId: message.senderId,
+      content: message.content,
+      timestamp: message.timestamp,
+      status: message.status,
+      type: message.type,
+    );
+  }
+
+  Future<void> fetchAndSetConversations() async {
+    final db = await database;
+    final maps = await db.query('conversations');
+
+    _conversations = List.generate(maps.length, (i) {
+      return Conversation.fromMap(maps[i]);
+    });
+  }
+
+  Future<List<Message>> getMessages(int friendId,
+      {int offset = 0, int limit = 50}) async {
+    final db = await database;
+    final maps = await db.query(
+      'messages',
+      where: 'friendId = ?',
+      whereArgs: [friendId],
+      orderBy: 'timestamp DESC',
+      limit: limit,
+      offset: offset,
+    );
+
+    return List.generate(maps.length, (i) {
+      return Message.fromMap(maps[i]);
+    });
   }
 }
 
@@ -176,7 +383,7 @@ class ChatSimulator {
     "Minha estratégia de trabalho é resolver todos os desafios com um concurso de caretas.",
     "Na próxima vez que eu for ao dentista, vou pedir uma coroa de marshmallow",
     "Minha próxima invenção será uma máquina que traduz miados de gatos em poesia épica."
-    "Costumo usar uma sombrinha de praia para me proteger da chuva.",
+        "Costumo usar uma sombrinha de praia para me proteger da chuva.",
     "Estou pensando em criar uma academia de ginástica para hamsters.",
     "Meu plano para o futuro é abrir um restaurante temático de comida intergaláctica.",
     "Na minha lista de afazeres, tenho 'Aprender a falar fluentemente em emoji'.",
