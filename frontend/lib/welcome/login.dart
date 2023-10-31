@@ -22,11 +22,11 @@ class _LoginPage extends State<LoginPage> {
   String _email = '';
   String _pwd = '';
 
-  Future<bool> tryLoginUser() async {
+  Future<bool> tryLoginUser(String email, String pwd) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _email, 
-        password: _pwd
+        email: email, 
+        password: pwd
       );
       print("User logged in: ${userCredential.user?.uid}");
       return true;
@@ -37,17 +37,14 @@ class _LoginPage extends State<LoginPage> {
   }
 
   void loginUser(BuildContext ctx) async {
-    // Armazene as referências antes das operações assíncronas
     final navigator = Navigator.of(ctx);
     final friendsProvider = Provider.of<FriendsProvider>(ctx, listen: false);
     final hubsProvider = Provider.of<HubsProvider>(ctx, listen: false);
 
-    if(await tryLoginUser()) {
-      // Inicialização dos Friends
+    if(await tryLoginUser(_email, _pwd)) {
       await friendsProvider.initializeDatabase();
       await friendsProvider.checkAndInsertInitialFriends();
 
-      // Inicialização dos hubs
       await hubsProvider.initializeDatabase();
       await hubsProvider.checkAndInsertInitialHubs();
 

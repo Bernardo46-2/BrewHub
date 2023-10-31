@@ -39,6 +39,8 @@ class _RegisterPage extends State<RegisterPage> {
       User? user = userCredential.user;
       await _firestore.collection('users').doc(user?.uid).set({
         'nick': nick,
+        'status': '',
+        'photo': null,
       });
       print("User created: ${user?.uid}");
     } catch (e) {
