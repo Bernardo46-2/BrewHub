@@ -23,6 +23,12 @@ class _RegisterPage extends State<RegisterPage> {
   String pwd = '';
   String pwd2 = '';
 
+  @override
+  void dispose() {
+    _pwdController.dispose();
+    super.dispose();
+  }
+
   // TODO: print if email is already in use
   Future<void> registerUser() async {
     try {
@@ -33,9 +39,10 @@ class _RegisterPage extends State<RegisterPage> {
       User? user = userCredential.user;
       await _firestore.collection('users').doc(user?.uid).set({
         'nick': nick,
+        'status': '',
+        'photo': null,
       });
       print("User created: ${user?.uid}");
-      
     } catch (e) {
       print("Register error: $e");
     }

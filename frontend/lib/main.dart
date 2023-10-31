@@ -6,6 +6,7 @@ import 'package:brewhub/welcome/welcome.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 
+// TODO: login automatically if user already logged in once
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
