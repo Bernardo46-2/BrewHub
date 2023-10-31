@@ -120,7 +120,6 @@ class ConversationProvider with ChangeNotifier {
   List<Conversation> get conversations => _conversations;
 
   set conversations(List<Conversation> conversations) {
-    _conversations = conversations;
     notifyListeners();
   }
 
@@ -189,7 +188,7 @@ class ConversationProvider with ChangeNotifier {
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    fetchAndSetConversations();
+    await fetchAndSetConversations();
   }
 
   Future<Message> addMessage(Message message) async {
@@ -226,6 +225,11 @@ class ConversationProvider with ChangeNotifier {
     );
   }
 
+  Future<List<Conversation>> getConversations() async {
+    await fetchAndSetConversations();
+    return _conversations;
+  }
+
   Future<void> fetchAndSetConversations() async {
     final db = await database;
     final maps = await db.query('conversations');
@@ -233,6 +237,8 @@ class ConversationProvider with ChangeNotifier {
     _conversations = List.generate(maps.length, (i) {
       return Conversation.fromMap(maps[i]);
     });
+
+    _conversations = conversations;
     ChangeNotifier();
   }
 
@@ -253,8 +259,9 @@ class ConversationProvider with ChangeNotifier {
       whereArgs: [friendId],
     );
 
+    _conversations.removeWhere((conversation) => conversation.friendId == friendId);
+    
     // Atualiza a lista de conversas no estado
-    fetchAndSetConversations();
     notifyListeners();
   }
 

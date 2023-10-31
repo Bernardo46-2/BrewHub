@@ -14,13 +14,19 @@ class ConversationsPage extends StatefulWidget {
 }
 
 class _ConversationsPage extends State<ConversationsPage> {
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
-    // Fetch conversations and friends data
-    Provider.of<ConversationProvider>(context, listen: false)
-        .fetchAndSetConversations();
-    Provider.of<FriendsProvider>(context, listen: false).fetchAndSetFriends();
+    // Inicialize o FriendsProvider e busque os amigos.
+    final friendsProvider =
+        Provider.of<FriendsProvider>(context, listen: false);
+    friendsProvider.fetchAndSetFriends().then((_) {
+      setState(() {
+        _isLoading = false;
+      });
+    });
   }
 
   @override
@@ -34,19 +40,47 @@ class _ConversationsPage extends State<ConversationsPage> {
       body: Stack(
         children: [
           backgroundHome(context),
-          Consumer<ConversationProvider>(
-            builder: (ctx, conversationProvider, _) {
-              // Este código será chamado sempre que ConversationProvider notificar seus ouvintes.
-              var conversations = conversationProvider.conversations;
-              return Consumer<FriendsProvider>(
-                builder: (ctx, friendsProvider, _) => ConversationsList(
-                  conversations: conversations,
-                  friends:
-                      friendsProvider.friends, // Pass the list of friends here
-                ),
-              );
-            },
-          ),
+          if (_isLoading)
+            CircularProgressIndicator()
+          else
+            Consumer<ConversationProvider>(
+              builder: (ctx, conversationProvider, _) {
+                return Consumer<FriendsProvider>(
+                  builder: (ctx, friendsProvider, _) {
+                    final conversationsFuture = conversationProvider
+                        .getConversations(); // Note that this returns a Future
+                    final friends = friendsProvider.friends;
+
+                    if (conversationsFuture == null) {
+                      // Handle the case when conversations are not available yet
+                      return CircularProgressIndicator();
+                    }
+
+                    return FutureBuilder<List<Conversation>>(
+                      future: conversationsFuture,
+                      builder: (ctx, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Ocorreu um erro: ${snapshot.error}');
+                        } else {
+                          final conversations = snapshot.data;
+                          if (conversations == null) {
+                            // Handle the case when conversations are not available yet
+                            return CircularProgressIndicator();
+                          }
+                          return ConversationsList(
+                            conversations: conversations,
+                            friends: friends,
+                          );
+                        }
+                      },
+                    );
+                  },
+                );
+              },
+            ),
         ],
       ),
     );

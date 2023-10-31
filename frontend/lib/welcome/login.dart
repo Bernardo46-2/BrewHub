@@ -1,3 +1,4 @@
+import 'package:brewhub/models/message.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:brewhub/style.dart';
@@ -40,6 +41,7 @@ class _LoginPage extends State<LoginPage> {
     final navigator = Navigator.of(ctx);
     final friendsProvider = Provider.of<FriendsProvider>(ctx, listen: false);
     final hubsProvider = Provider.of<HubsProvider>(ctx, listen: false);
+    final conversationProvider = Provider.of<ConversationProvider>(ctx, listen: false);
 
     if(await tryLoginUser(_email, _pwd)) {
       await friendsProvider.initializeDatabase();
@@ -47,6 +49,10 @@ class _LoginPage extends State<LoginPage> {
 
       await hubsProvider.initializeDatabase();
       await hubsProvider.checkAndInsertInitialHubs();
+
+      await hubsProvider.fetchAndSetHubs();
+      await friendsProvider.fetchAndSetFriends();
+      await conversationProvider.fetchAndSetConversations();
 
       navigator.push(
         MaterialPageRoute(

@@ -1,6 +1,7 @@
 import 'package:brewhub/home/navigation.dart';
 import 'package:brewhub/models/friend.dart';
 import 'package:brewhub/models/hub.dart';
+import 'package:brewhub/models/message.dart';
 import 'package:brewhub/style.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -12,12 +13,13 @@ import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => FriendsProvider()),
         ChangeNotifierProvider(create: (context) => HubsProvider()),
+        ChangeNotifierProvider(create: (context) => ConversationProvider()),
       ],
       child: const BrewHub(),
     ),
@@ -26,7 +28,7 @@ void main() async {
 
 class BrewHub extends StatefulWidget {
   const BrewHub({super.key});
-  
+
   @override
   State<BrewHub> createState() => _BrewHub();
 }
@@ -34,10 +36,10 @@ class BrewHub extends StatefulWidget {
 class _BrewHub extends State<BrewHub> {
   FirebaseAuth auth = FirebaseAuth.instance;
   bool isLogged = false;
-  
+
   Future<void> testLogin() async {
     auth.authStateChanges().listen((User? user) {
-      if(user != null && mounted) {
+      if (user != null && mounted) {
         setState(() {
           isLogged = true;
         });
