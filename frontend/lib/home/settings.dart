@@ -14,34 +14,34 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPage extends State<SettingsPage> {
   static const String _photoUrlKey = 'photoUrl';
-  static const String _nameKey = 'name';
+  static const String _nameKey = 'nick';
   static const String _statusKey = 'status';
-  String _photo = '';
-  String _name = 'Sigurd';
-  String _status = 'I work for Belethor, at the General Goods store.';
+  String _photoUrl = '';
+  String _name = '';
+  String _status = '';
 
   ImageProvider loadPhotoUrl(String photo) {
     if(photo.startsWith('http')) {
       return NetworkImage(photo, scale: 1);
     }
-    return const AssetImage('assets/sigurd.jpeg');
+    return const AssetImage('assets/doggo.jpg');
   }
   
-  Future<void> initValue(void Function(String?) pred, String value) async {
+  Future<void> initValue(void Function(String?) pred, String key) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    pred(prefs.getString(value));
+    pred(prefs.getString(key));
   }
 
-  Future<void> saveValue(void Function() pred, String value, String newValue) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString(value, newValue);
+  Future<void> saveValue(void Function() pred, String key, String value) async {
     pred();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
   }
 
-  Future<void> removeValue(void Function() pred, String value) async {
+  Future<void> removeValue(void Function() pred, String key) async {
     pred();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove(value);
+    await prefs.remove(key);
   }
   
   Widget _buildSettingsItem(IconData icon, String text, void Function() pred) {
@@ -57,19 +57,11 @@ class _SettingsPage extends State<SettingsPage> {
         ),
       ),
       trailing: const Icon(
-        Icons.chevron_right, 
+        Icons.chevron_right,
         color: Colors.white
       ),
       onTap: pred
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    initValue((value) { _photo = value ?? _photo; }, _photoUrlKey);
-    initValue((value) { _name = value ?? _name; }, _nameKey);
-    initValue((value) { _status = value ?? _status; }, _statusKey);
   }
 
   @override
@@ -107,56 +99,80 @@ class _SettingsPage extends State<SettingsPage> {
             child: Column(
               children: <Widget>[
                 const SizedBox(height: 40),
-                GestureDetector(
-                  child: CircleAvatar(
-                    radius: 60,
-                    backgroundImage: loadPhotoUrl(_photo),
-                  ),
-                  onTap: () {
-                    showDialog(
-                      context: ctx,
-                      builder: (ctx) => ConfirmCancelModal(
-                        title: 'Alterar Foto',
-                        formPlaceholder: 'Url da foto',
-                        invalidInputMsg: 'Campo url obrigatório',
-                        action: (value) {
-                          setState(() {
-                            saveValue(() { _photo = value; }, _photoUrlKey, value);
-                          });
-                        }
+                FutureBuilder(
+                  future: initValue((value) { _photoUrl = value ?? _photoUrl; }, _photoUrlKey),
+                  builder: (context, snapshot) {
+                    if(snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    return GestureDetector(
+                      child: CircleAvatar(
+                        radius: 60,
+                        backgroundImage: loadPhotoUrl(_photoUrl),
                       ),
+                      onTap: () {
+                        showDialog(
+                          context: ctx,
+                          builder: (ctx) => ConfirmCancelModal(
+                            title: 'Alterar Foto',
+                            formPlaceholder: 'Url da foto',
+                            invalidInputMsg: 'Campo url obrigatório',
+                            action: (value) {
+                              setState(() {
+                                saveValue(() { _photoUrl = value; }, _photoUrlKey, value);
+                              });
+                            }
+                          ),
+                        );
+                      },
+                      onLongPress: () {
+                        showDialog(
+                          context: ctx,
+                          builder: (ctx) => ConfirmCancelModal(
+                            title: 'Remover foto?',
+                            action: (_) {
+                              setState(() {
+                                removeValue(() { _photoUrl = ''; }, _photoUrlKey);
+                              });
+                            }
+                          ),
+                        );
+                      }
                     );
                   },
-                  onLongPress: () {
-                    showDialog(
-                      context: ctx,
-                      builder: (ctx) => ConfirmCancelModal(
-                        title: 'Remover foto?',
-                        action: (_) {
-                          setState(() {
-                            removeValue(() { _photo = ''; }, _photoUrlKey);
-                          });
-                        }
+                ),
+                const SizedBox(height: 20),
+                FutureBuilder(
+                  future: initValue((value) { _name = value ?? _name; }, _nameKey),
+                  builder: (context, snapshot) {
+                    if(snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    return Text(
+                      _name,
+                      style: const TextStyle(
+                        fontSize: 18, 
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white
                       ),
                     );
                   }
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  _name,
-                  style: const TextStyle(
-                    fontSize: 18, 
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white
-                  ),
-                ),
                 const SizedBox(height: 10),
-                Text(
-                  _status,
-                  style: const TextStyle(
-                    fontSize: 14, 
-                    color: Colors.grey
-                  ),
+                FutureBuilder(
+                  future: initValue((value) { _status = value ?? _status; }, _statusKey),
+                  builder: (context, snapshot) {
+                    if(snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    return Text(
+                      _status,
+                      style: const TextStyle(
+                        fontSize: 14, 
+                        color: Colors.grey
+                      ),
+                    );
+                  }
                 ),
                 const SizedBox(height: 40),
                 Expanded(
@@ -192,7 +208,6 @@ class _SettingsPage extends State<SettingsPage> {
                           ),
                         );
                       }),
-                      _buildSettingsItem(Icons.notifications, 'Notificações', () {}),
                       _buildSettingsItem(Icons.exit_to_app, 'Sair', () {
                         FirebaseAuth.instance.signOut();
                         Navigator.of(ctx).push(
@@ -332,5 +347,20 @@ class _ConfirmCancelModal extends State<ConfirmCancelModal> {
         ),
       ),
     );
+  }
+}
+
+class SharedPreferencesProvider extends ChangeNotifier {
+  SharedPreferences? _prefs;
+
+  SharedPreferences? get prefs => _prefs;
+
+  SharedPreferencesProvider() {
+    initSharedPreferences();
+  }
+
+  Future<void> initSharedPreferences() async {
+    _prefs = await SharedPreferences.getInstance();
+    notifyListeners();
   }
 }
