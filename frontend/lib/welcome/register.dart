@@ -1,7 +1,12 @@
+import 'package:brewhub/home/navigation.dart';
+import 'package:brewhub/models/friend.dart';
+import 'package:brewhub/models/hub.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:brewhub/style.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -29,9 +34,27 @@ class _RegisterPage extends State<RegisterPage> {
     super.dispose();
   }
 
+  void onRegisterSuccess(BuildContext ctx) async {
+    final navigator = Navigator.of(ctx);
+    final friendsProvider = Provider.of<FriendsProvider>(ctx, listen: false);
+    final hubsProvider = Provider.of<HubsProvider>(ctx, listen: false);
+    await friendsProvider.initializeDatabase();
+    await friendsProvider.checkAndInsertInitialFriends();
+
+    await hubsProvider.initializeDatabase();
+    await hubsProvider.checkAndInsertInitialHubs();
+
+    navigator.push(
+      MaterialPageRoute(
+        builder: (ctx) => const Navigation(),
+      ),
+    );
+  }
+
   // TODO: print if email is already in use
-  Future<void> registerUser() async {
+  Future<void> registerUser(BuildContext ctx) async {
     try {
+      onRegisterSuccess(ctx);
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: pwd,
@@ -40,8 +63,13 @@ class _RegisterPage extends State<RegisterPage> {
       await _firestore.collection('users').doc(user?.uid).set({
         'nick': nick,
         'status': '',
-        'photo': null,
+        'photo': '',
       });
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('nick', nick);
+      await prefs.setString('status', '');
+      await prefs.setString('photoUrl', '');
       print("User created: ${user?.uid}");
     } catch (e) {
       print("Register error: $e");
@@ -305,7 +333,7 @@ class _RegisterPage extends State<RegisterPage> {
                                 onPressed: () {
                                   if(_formKey.currentState != null && _formKey.currentState!.validate()) {
                                     _formKey.currentState!.save();
-                                    registerUser();
+                                    registerUser(ctx);
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
