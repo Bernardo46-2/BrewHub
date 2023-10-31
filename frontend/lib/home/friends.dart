@@ -199,7 +199,10 @@ class FriendTile extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ChatScreen(friend: friend),
+                                builder: (context) => ChatScreen(
+                                  friend: friend,
+                                  isGroupChat: false,
+                                ),
                               ),
                             );
                           },
