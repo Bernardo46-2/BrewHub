@@ -19,6 +19,7 @@ const Color dark3_50 =
 const Color dark4 = Color(0xFF565858); // For sidebars, navbar
 const Color dark5 = Color(0xFF707172); // For modal, dialogs
 const Color dark6 = Color(0xFF8B8C8C); // For on texts
+const Color dark7 = Color.fromARGB(255, 187, 189, 189);
 
 const Color feedbackBlue = Color(0xFF5D95C8);
 const Color feedbackYellow = Color(0xFFE1B15B);

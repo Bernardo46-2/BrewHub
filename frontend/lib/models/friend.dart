@@ -199,28 +199,28 @@ class FriendsProvider with ChangeNotifier {
           name: 'Walter Alves',
           status: 'Squawk 7700',
           photo:
-              'https://scontent.fplu33-1.fna.fbcdn.net/v/t39.30808-6/365896111_988765365499763_1678912154615413266_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeFaJDm1S4JQ118d4xPKW9jNY4DAlW5UNw9jgMCVblQ3DztOZ9FtiAJD5CrMPRdPfCdnVN53pu-70LQIKb_Z1FA7&_nc_ohc=2I8obI06bhsAX8e2O3B&_nc_oc=AQk9b8eJ0CJ28JH3bsX7dszwGTyhhhJ7ssQNKaBrVVZ-8tw3HPw4uOBSlUB_R4eOs5Y&_nc_ht=scontent.fplu33-1.fna&oh=00_AfA4odhF85H6elr1m8K_lHHJs8Qrwgcb3n2qeuc0_AczmA&oe=65428BEF',
+              'https://media-gru1-1.cdn.whatsapp.net/v/t61.24694-24/359545840_2481500805351035_6895775598026583637_n.jpg?ccb=11-4&oh=01_AdQHAgDFwtHFtKGBNvsTCUk5497SdZodBT-aZClOyG2FZw&oe=654FED6B&_nc_sid=e6ed6c&_nc_cat=106',
           isOnline: true),
       Friend(
           id: -1,
           name: 'Lilla Adhlyss',
           status: 'Wibly Wobly Timey Wimey',
           photo:
-              'https://scontent.fplu33-1.fna.fbcdn.net/v/t39.30808-6/324885531_679745897026970_3004840708359347446_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeGanqCTRR_JTabXfhL7Bv3267HkntxxqwrrseSe3HGrCggjASPXWi-hhX6QXf3F-rFmHT4br6waLLtTKQAOAcIn&_nc_ohc=HSxwolu1tikAX8nOx1R&_nc_ht=scontent.fplu33-1.fna&oh=00_AfAaeFzXCUJEByqW_YqsEh7b6LWRY-us4NB9zxQHy6uVug&oe=65432FB7',
+              'https://media-gru1-1.cdn.whatsapp.net/v/t61.24694-24/389809921_1086000919432912_4591175991150367984_n.jpg?ccb=11-4&oh=01_AdS7j0VMMCDtfsOJZSgaL71snLJ-yNT4XHMEUKcPQAvsfA&oe=654FBDFF&_nc_sid=e6ed6c&_nc_cat=105',
           isOnline: false),
       Friend(
           id: -1,
-          name: 'Fernando Augusto',
+          name: 'Vini Lages',
           status: 'L',
           photo:
-              'https://scontent.fplu33-1.fna.fbcdn.net/v/t39.30808-6/328347901_1484211388773633_1033593142037780645_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeG2AGKrhEBblxFyUmMg12RF57y48urm_IrnvLjy6ub8isLsvRajyviPn0xVhlLIqqN_TUw6nElLmEv6lJXPBMje&_nc_ohc=mbyKi8MVS3AAX9-9qgz&_nc_ht=scontent.fplu33-1.fna&oh=00_AfBwmounLb_BDsKVM1o1UDe1lco5j1vipctTzNyz-tet9w&oe=6542055B',
+              'https://media-gru1-1.cdn.whatsapp.net/v/t61.24694-24/349423126_713511900534247_6867080459239269016_n.jpg?ccb=11-4&oh=01_AdTc6WEAm6yypXIP322DSHJuRy7g1ltQFid_c4FdPuMsag&oe=654FD676&_nc_sid=e6ed6c&_nc_cat=105',
           isOnline: true),
       Friend(
           id: -1,
           name: 'Sarah Kelly',
           status: '...',
           photo:
-              'https://scontent.fplu33-1.fna.fbcdn.net/v/t39.30808-6/348478444_618747633609535_3568139516769812170_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeHsn57lmHRIJ84eYtMTaocorf6etLBZh4Ot_p60sFmHg9h4OHA5jDwL0fB-M9vUbaQoIqmAKvG9cXRqaqRcvp4O&_nc_ohc=_52qBAfbZ6kAX_yHQcK&_nc_ht=scontent.fplu33-1.fna&oh=00_AfA4Zidjn0Ysuu3QMGY7GJkenwcxjOTTSO8mM5_zD44Zfg&oe=654333CA',
+              'https://media-gru1-1.cdn.whatsapp.net/v/t61.24694-24/386206090_1054385005998658_885895072102375202_n.jpg?ccb=11-4&oh=01_AdTw94KHSwfwH_XJtUht9pu6usU8_LXYNVc8qtBAOnNILg&oe=654FEAAA&_nc_sid=e6ed6c&_nc_cat=102',
           isOnline: false),
       Friend(
           id: -1,
@@ -241,7 +241,7 @@ class FriendsProvider with ChangeNotifier {
           name: 'Luan Matsumoto',
           status: 'Só chamadas urgentes',
           photo:
-              'https://scontent.fplu33-1.fna.fbcdn.net/v/t39.30808-6/353798459_214169444826346_8759020322014440683_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeG0Fg-mtVjJe5aFNmiZsqftAhEmFRqVMXgCESYVGpUxeGCtr1ATjtuTDYd-KPdV44BQIzqFbOJHjqDLJi0G7mpS&_nc_ohc=4W2DFJu_THMAX82siAT&_nc_ht=scontent.fplu33-1.fna&oh=00_AfApRz2HC-cUVkHRPtq0SYZAGxoa8hn4QySci1ZbfWuFqg&oe=6542BE24',
+              'https://media-gru1-1.cdn.whatsapp.net/v/t61.24694-24/383768420_1454259188756834_908539885298978416_n.jpg?ccb=11-4&oh=01_AdQ7CpbV0aGnGLUWa2cyih-vQd464ArdI3CKO3gQvWPNfQ&oe=654FC05B&_nc_sid=e6ed6c&_nc_cat=109',
           isOnline: false),
       Friend(
           id: -1,
