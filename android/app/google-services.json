@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "292497793451",
+    "project_id": "brewhub-86080",
+    "storage_bucket": "brewhub-86080.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:292497793451:android:28846c28bd14c8782f72ee",
+        "android_client_info": {
+          "package_name": "com.aviao_brutal_do_scat.brewhub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWpuyQui46zVK4ZgvgmGEzfMdsrWJpIbg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
