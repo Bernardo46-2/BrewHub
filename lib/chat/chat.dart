@@ -46,14 +46,14 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _initializeConversation() async {
     await ensureConversationExists(widget.friend.id);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    selfId = int.parse(prefs.getString('id')??"-2");
-    chatId = getChatId(selfId,  widget.friend.id);
+    selfId = int.parse(prefs.getString('id') ?? "-2");
+    chatId = getChatId(selfId, widget.friend.id);
 
     _messageStreamer = MessageStreamer(chatId);
     _fetchMessages();
     _messageStreamer.startListeningForMessages();
     _messageStreamer.messageStream.listen((message) {
-      if (!_messagesStreamController.isClosed) {
+      if (!_messagesStreamController.isClosed && message.senderId != selfId) {
         _messages.insert(0, message);
         _messagesStreamController.add(List.from(_messages));
       }
@@ -80,7 +80,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _sendMessage(String messageContent) async {
-    DocumentReference chatDoc = _firestore.collection('conversations').doc(chatId);
+    DocumentReference chatDoc =
+        _firestore.collection('conversations').doc(chatId);
 
     final newMessage = Message(
       id: null,
@@ -146,7 +147,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 // Navega para a tela de ligação
                 await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => VideoCallScreen(friend: widget.friend),
+                    builder: (context) =>
+                        VideoCallScreen(friend: widget.friend),
                   ),
                 );
 
@@ -297,11 +299,13 @@ class MessageStreamer {
   StreamSubscription? _firestoreSubscription;
 
   void startListeningForMessages() {
-    DocumentReference chatDoc = _firestore.collection('conversations').doc(chatId);
+    DocumentReference chatDoc =
+        _firestore.collection('conversations').doc(chatId);
 
     _firestoreSubscription?.cancel(); // Cancela qualquer listener existente
 
-    _firestoreSubscription = chatDoc.collection('messages')
+    _firestoreSubscription = chatDoc
+        .collection('messages')
         .orderBy('timestamp')
         .snapshots()
         .listen((snapshot) {
