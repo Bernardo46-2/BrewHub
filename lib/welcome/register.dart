@@ -70,17 +70,11 @@ class _RegisterPage extends State<RegisterPage> {
       final shard = await sharding.doc(nick).get();
       if(shard.exists) {
         Map<String, dynamic> shardData = shard.data() as Map<String, dynamic>;
-
-        print("=======================================================================================\n\n");
-        print(shardData);
         shardNumber = int.parse(shardData['shard'] ?? "0");
         shardData['shard'] = (shardNumber+1).toString();
         await sharding.doc(nick).update(shardData);
-        print("=======================================================================================\n\n");
       } else {
-        print('================================== else ===================================\n\n');
         await _firestore.collection('user_sharding').doc(nick).set({'shard': (shardNumber+1).toString()});
-        print('================================== else after await ======================================\n\n');
       }
 
       if(shardNumber < 0) {

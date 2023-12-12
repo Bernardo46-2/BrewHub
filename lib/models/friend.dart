@@ -68,7 +68,7 @@ class Friend with ChangeNotifier {
     if (photo.startsWith('http')) {
       return NetworkImage(photo, scale: 1);
     } else {
-      return const AssetImage('assets/faces/default.png');
+      return const AssetImage('assets/doggo.jpg');
     }
   }
 }
