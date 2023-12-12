@@ -57,6 +57,7 @@ class _RegisterPage extends State<RegisterPage> {
       onRegisterSuccess(ctx);
       
       int shardNumber = 0;
+      int userId = 0;
 
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
@@ -77,11 +78,32 @@ class _RegisterPage extends State<RegisterPage> {
         await _firestore.collection('user_sharding').doc(nick).set({'shard': (shardNumber+1).toString()});
       }
 
+      print("====================================================================================\n\n");
+      final CollectionReference userIds = _firestore.collection('user_ids');
+
+      print("====================================================================================\n\n");
+      final userIdsDoc = await userIds.doc('ids').get();
+      print("====================================================================================\n\n");
+      if(userIdsDoc.exists) {
+        // 'id': int
+        Map<String, dynamic> uidDaata = userIdsDoc.data() as Map<String, dynamic>;
+        print("**********************************************************************************************\n\n");
+        userId = int.parse(uidDaata['id'] ?? "0");
+        print("**********************************************************************************************\n\n");
+        uidDaata['id'] = (userId+1).toString();
+        print("**********************************************************************************************\n\n");
+        await userIds.doc('ids').update(uidDaata);
+        print("**********************************************************************************************\n\n");
+      } else {
+        await _firestore.collection('user_ids').doc('ids').set({'id': (userId+1).toString()});
+      }
+
       if(shardNumber < 0) {
         throw Exception("oporra");
       }
 
       await _firestore.collection('users').doc(user?.uid).set({
+        'id': userId.toString(),
         'nick': nick,
         'status': '',
         'photo': '',
@@ -89,6 +111,7 @@ class _RegisterPage extends State<RegisterPage> {
       });
 
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('id', userId.toString());
       await prefs.setString('nick', nick);
       await prefs.setString('status', '');
       await prefs.setString('photoUrl', '');
