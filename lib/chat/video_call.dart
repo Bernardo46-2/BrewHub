@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:brewhub/models/friend.dart';
 import 'package:brewhub/style.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:sdp_transform/sdp_transform.dart';
-import 'package:clipboard/clipboard.dart';
 import 'dart:math' as math;
 
 class VideoCallScreen extends StatefulWidget {
@@ -33,6 +33,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
   RTCPeerConnection? _peerConnection;
   MediaStream? _localStream;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   initRenderer() async {
     await _localVideoRenderer.initialize();
@@ -81,13 +83,29 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       pc.addTrack(track, _localStream!);
     });
 
-    pc.onIceCandidate = (e) {
+    /* pc.onIceCandidate = (e) {
       if (e.candidate != null) {
         print(json.encode({
           'candidate': e.candidate.toString(),
           'sdpMid': e.sdpMid.toString(),
           'sdpMlineIndex': e.sdpMLineIndex,
         }));
+      }
+    }; */
+    pc.onIceCandidate = (e) async {
+      if (e.candidate != null) {
+        String field = _offer ? 'offer_ice_candidates' : 'answer_ice_candidates';
+        String candidateJson = jsonEncode({
+          'candidate': e.candidate.toString(),
+          'sdpMid': e.sdpMid.toString(),
+          'sdpMlineIndex': e.sdpMLineIndex,
+        });
+
+        // Adicionar ao Firestore
+        DocumentReference callDoc = _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
+        await callDoc.update({
+          field: FieldValue.arrayUnion([candidateJson])
+        });
       }
     };
 
@@ -113,7 +131,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   }
 
   void _createOffer() async {
-    print('peerConnection = ${_peerConnection}');
+    print('peerConnection = $_peerConnection');
     RTCSessionDescription description =
         await _peerConnection!.createOffer({'offerToReceiveVideo': 1});
     var session = parse(description.sdp.toString());
@@ -125,7 +143,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
         "______________________________________________________ CREATE OFFER ______________________________________________________");
     _offer = true;
 
-    FlutterClipboard.copy(offer).then((value) => print('Copied to clipboard'));
+    // Armazenar a oferta no Firestore
+    DocumentReference callDoc = _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
+    await callDoc.update({'offer': offer});
 
     _peerConnection!.setLocalDescription(description);
   }
@@ -142,41 +162,58 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     print(
         "______________________________________________________ CREATE ANSWER ______________________________________________________");
 
-    FlutterClipboard.copy(encodedSession)
-        .then((value) => print('Copied to clipboard'));
+    // Armazenar a oferta no Firestore
+    DocumentReference callDoc = _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
+    await callDoc.update({'answer': encodedSession});
 
     _peerConnection!.setLocalDescription(description);
   }
 
   void _setRemoteDescription() async {
-    String jsonString = sdpController.text;
-    dynamic session = await jsonDecode(jsonString);
+    // Armazenar a oferta no Firestore
+    DocumentReference callDoc = _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
+    final data = await callDoc.get();
+    final call = data.data() as Map<String, dynamic>;
 
-    String sdp = write(session, null);
+    if (data.exists) {
+      dynamic session;
+      if (_offer) {
+        session = await jsonDecode(call['answer']);
+      } else {
+        session = await jsonDecode(call['offer']);
+      }
 
-    RTCSessionDescription description =
-        RTCSessionDescription(sdp, _offer ? 'answer' : 'offer');
+      String sdp = write(session, null);
 
-    print(
-        "______________________________________________________ SET REMOTE DESCRIPTION ______________________________________________________");
-    print(description.toMap());
-    print(
-        "______________________________________________________ SET REMOTE DESCRIPTION ______________________________________________________");
-
-    await _peerConnection!.setRemoteDescription(description);
+      RTCSessionDescription description =
+          RTCSessionDescription(sdp, _offer ? 'answer' : 'offer');
+      await _peerConnection!.setRemoteDescription(description);
+    } else {
+      print("fudeu foi muito mesmo");
+    }
   }
 
   void _addCandidate() async {
-    String jsonString = sdpController.text;
-    dynamic session = await jsonDecode(jsonString);
-    print(
-        "______________________________________________________ ADD CANDIDATE ______________________________________________________");
-    print(session['candidate']);
-    print(
-        "______________________________________________________ ADD CANDIDATE ______________________________________________________");
-    dynamic candidate = RTCIceCandidate(
-        session['candidate'], session['sdpMid'], session['sdpMlineIndex']);
-    await _peerConnection!.addCandidate(candidate);
+    // Armazenar a oferta no Firestore
+    DocumentReference callDoc = _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
+    String field = _offer ? 'offer_ice_candidates' : 'answer_ice_candidates';
+    final data = await callDoc.get();
+    final call = data.data() as Map<String, dynamic>;
+
+    if (data.exists) {
+      List<dynamic> candidates = call[field];
+
+      for (String jsonString in candidates) {
+        dynamic session = await jsonDecode(jsonString);
+
+        dynamic candidate = RTCIceCandidate(
+          session['candidate'], session['sdpMid'], session['sdpMlineIndex']
+        );
+        await _peerConnection!.addCandidate(candidate);
+      }
+    } else {
+      print("Documento não encontrado no Firestore.");
+    }
   }
 
   @override
@@ -190,7 +227,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
   @override
   void dispose() async {
-    /* sdpController.dispose();
+    sdpController.dispose();
 
     _localVideoRenderer.srcObject?.getTracks().forEach((track) {
       track.stop();
@@ -201,10 +238,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
     await _localVideoRenderer.dispose();
     await _remoteVideoRenderer.dispose();
-    super.dispose(); */
-
-    await _localVideoRenderer.dispose();
-    sdpController.dispose();
     super.dispose();
   }
 
@@ -261,13 +294,13 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   }
 
   void _toggleMute() {
-    /* if (_localStream != null) {
+    if (_localStream != null) {
       bool isAudioTrackEnabled = _localStream!.getAudioTracks().first.enabled;
       setState(() {
         _localStream!.getAudioTracks().first.enabled = !isAudioTrackEnabled;
         _isMuted = !_isMuted;
       });
-    } */
+    }
   }
 
   void _switchCameraViews() {
