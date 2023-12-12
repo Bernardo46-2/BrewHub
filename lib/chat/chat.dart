@@ -1,13 +1,14 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'dart:async';
-import 'dart:math';
 import 'package:brewhub/chat/input_bar.dart';
 import 'package:brewhub/chat/video_call.dart';
 import 'package:brewhub/models/friend.dart';
 import 'package:brewhub/models/message.dart';
 import 'package:brewhub/style.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatScreen extends StatefulWidget {
   final Friend friend;
@@ -32,6 +33,8 @@ class _ChatScreenState extends State<ChatScreen> {
   final ChatSimulator chatSimulator = ChatSimulator();
   StreamSubscription? _messageSubscription;
   late final MessageStreamer _messageStreamer;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  int selfId = -1;
 
   @override
   void initState() {
@@ -41,8 +44,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _initializeConversation() async {
     await ensureConversationExists(widget.friend.id);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    selfId = int.parse(prefs.getString('shard')??"-2");
 
-    _messageStreamer = MessageStreamer(_conversationProvider);
+    _messageStreamer = MessageStreamer();
     _fetchMessages();
     _messageStreamer.startSimulation(widget.friend.id);
     _messageStreamer.messageStream.listen((message) {
@@ -72,7 +77,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final newMessage = Message(
       id: null,
       friendId: widget.friend.id,
-      senderId: 0,
+      senderId: selfId,
       content: messageContent,
       timestamp: DateTime.now(),
       status: MessageStatus.notSent,
@@ -80,6 +85,10 @@ class _ChatScreenState extends State<ChatScreen> {
     );
 
     Message msg = await _conversationProvider.addMessage(newMessage);
+
+  
+    DocumentReference messageDoc = _firestore.collection('messages').doc();
+    await messageDoc.set(newMessage.toMap());
 
     // Atualiza a lista de mensagens com a mensagem inserida
     _messages.insert(0, msg);
@@ -269,34 +278,37 @@ class MessageBubble extends StatelessWidget {
 class MessageStreamer {
   final StreamController<Message> _messageController =
       StreamController<Message>();
-  final ConversationProvider _conversationProvider;
+  // final ConversationProvider _conversationProvider;
   final ChatSimulator chatSimulator = ChatSimulator();
   StreamSubscription?
       _timerSubscription; // Adicionado para manter a referência à assinatura
 
-  MessageStreamer(this._conversationProvider);
+  MessageStreamer();
 
   Stream<Message> get messageStream => _messageController.stream;
 
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  StreamSubscription? _firestoreSubscription;
+
   void startSimulation(int friendId) {
-    final random = Random(DateTime.now().millisecondsSinceEpoch);
+    // Cancelar a simulação atual se ela já estiver rodando
+    _firestoreSubscription?.cancel();
 
-    _timerSubscription = Stream.periodic(
-      Duration(seconds: (random.nextInt(12) + 3)),
-    ).listen((_) async {
-      final randomMessage = Message(
-        id: null,
-        friendId: friendId,
-        senderId: friendId,
-        content: chatSimulator.randomMessage,
-        timestamp: DateTime.now(),
-        status: MessageStatus.sent,
-        type: MessageType.text,
-      );
-
-      Message insertedMessage =
-          await _conversationProvider.addMessage(randomMessage);
-      _messageController.add(insertedMessage);
+    _firestoreSubscription = _firestore
+        .collection('messages')
+        .where('chatId', isEqualTo: '0') // Usando um ID de conversa fixo
+        .orderBy('timestamp')
+        .snapshots()
+        .listen((snapshot) {
+      for (var docChange in snapshot.docChanges) {
+        if (docChange.type == DocumentChangeType.added) {
+          var messageData = docChange.doc.data() as Map<String, dynamic>;
+          var message = Message.fromMap(messageData);
+          if (message.friendId == friendId) {
+            _messageController.add(message);
+          }
+        }
+      }
     });
   }
 
