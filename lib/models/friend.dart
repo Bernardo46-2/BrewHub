@@ -138,7 +138,7 @@ class FriendsProvider with ChangeNotifier {
       var doc = querySnapshot.docs.first;
       Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
       Friend friend = Friend(
-        id: int.parse(data['shard'] as String),
+        id: int.parse(data['id'] as String),
         name: data['nick'] as String,
         status: data['status'] as String,
         photo: data['photo'] as String,

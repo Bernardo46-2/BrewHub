@@ -46,7 +46,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _initializeConversation() async {
     await ensureConversationExists(widget.friend.id);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    selfId = int.parse(prefs.getString('shard')??"-2");
+    selfId = int.parse(prefs.getString('id')??"-2");
     chatId = getChatId(selfId,  widget.friend.id);
 
     _messageStreamer = MessageStreamer(chatId);
@@ -178,10 +178,9 @@ class _ChatScreenState extends State<ChatScreen> {
                         reverse: true,
                         itemBuilder: (context, index) {
                           final message = messages[index];
-                          bool isMe = message.senderId == 0;
                           return MessageBubble(
                             message: message,
-                            isMe: isMe,
+                            selfId: selfId,
                             isGroupChat: widget.isGroupChat,
                           );
                         },
@@ -208,18 +207,19 @@ class _ChatScreenState extends State<ChatScreen> {
 
 class MessageBubble extends StatelessWidget {
   final Message message;
-  final bool isMe;
+  final int selfId;
   final bool isGroupChat;
 
   const MessageBubble({
     required this.message,
-    required this.isMe,
+    required this.selfId,
     required this.isGroupChat, // Adicionado para verificar se é um chat em grupo
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    bool isMe = message.senderId == selfId;
     return Row(
       mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
