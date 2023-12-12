@@ -55,21 +55,50 @@ class _RegisterPage extends State<RegisterPage> {
   Future<void> registerUser(BuildContext ctx) async {
     try {
       onRegisterSuccess(ctx);
+      
+      int shardNumber = 0;
+
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: pwd,
       );
+
       User? user = userCredential.user;
+
+      final CollectionReference sharding = _firestore.collection('user_sharding');
+      
+      final shard = await sharding.doc(nick).get();
+      if(shard.exists) {
+        Map<String, dynamic> shardData = shard.data() as Map<String, dynamic>;
+
+        print("=======================================================================================\n\n");
+        print(shardData);
+        shardNumber = int.parse(shardData['shard'] ?? "0");
+        shardData['shard'] = (shardNumber+1).toString();
+        await sharding.doc(nick).update(shardData);
+        print("=======================================================================================\n\n");
+      } else {
+        print('================================== else ===================================\n\n');
+        await _firestore.collection('user_sharding').doc(nick).set({'shard': (shardNumber+1).toString()});
+        print('================================== else after await ======================================\n\n');
+      }
+
+      if(shardNumber < 0) {
+        throw Exception("oporra");
+      }
+
       await _firestore.collection('users').doc(user?.uid).set({
         'nick': nick,
         'status': '',
         'photo': '',
+        'shard': shardNumber.toString()
       });
 
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('nick', nick);
       await prefs.setString('status', '');
       await prefs.setString('photoUrl', '');
+      await prefs.setString('shard', shardNumber.toString());
       print("User created: ${user?.uid}");
     } catch (e) {
       print("Register error: $e");
