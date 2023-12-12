@@ -378,15 +378,8 @@ class _AddFriendModalState extends State<AddFriendModal> {
                     final userId = int.tryParse(_idController.text);
                     if (userId != null) {
                       // Adicione o contato ao banco de dados e atualize a lista
-                      final newFriend = Friend(
-                        id: userId,
-                        name: _nameController.text,
-                        status: "...", // Status padrão
-                        photo: 'assets/faces/default.png', // Imagem padrão
-                        isOnline: false,
-                      );
                       Provider.of<FriendsProvider>(context, listen: false)
-                          .addFriend(newFriend);
+                          .addFriendFromFirestore(_nameController.text, _idController.text);
                       // Limpe a mensagem de erro (se houver)
                       setState(() {
                         errorMessage = null;

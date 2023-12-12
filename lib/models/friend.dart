@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -6,6 +7,7 @@ class Friend with ChangeNotifier {
   final String name;
   final String status;
   final String photo;
+  final String shard;
   bool isOnline;
 
   Friend({
@@ -13,6 +15,7 @@ class Friend with ChangeNotifier {
     required this.name,
     required this.status,
     required this.photo,
+    required this.shard,
     required this.isOnline,
   });
 
@@ -22,6 +25,7 @@ class Friend with ChangeNotifier {
       'name': name,
       'status': status,
       'photo': photo,
+      'shard': shard,
       'isOnline': isOnline ? 1 : 0
     };
   }
@@ -31,6 +35,7 @@ class Friend with ChangeNotifier {
       'name': name,
       'status': status,
       'photo': photo,
+      'shard': shard,
       'isOnline': isOnline ? 1 : 0,
     };
   }
@@ -40,6 +45,7 @@ class Friend with ChangeNotifier {
         name = map['name'],
         status = map['status'],
         photo = map['photo'],
+        shard = map['shard'],
         isOnline = map['isOnline'] == 1;
 
   Map<String, dynamic> toJson() {
@@ -48,6 +54,7 @@ class Friend with ChangeNotifier {
       'name': name,
       'status': status,
       'photo': photo,
+      'shard': shard,
       'isOnline': isOnline ? 1 : 0,
     };
   }
@@ -100,6 +107,7 @@ class FriendsProvider with ChangeNotifier {
           name TEXT,
           status TEXT,
           photo TEXT,
+          shard TEXT,
           isOnline INTEGER
         )
         ''',
@@ -114,6 +122,36 @@ class FriendsProvider with ChangeNotifier {
 
     if (count == 0) {
       await _insertInitialFriends(); // Se estiver vazia, insere os amigos iniciais
+    }
+  }
+
+  Future<bool> addFriendFromFirestore(String name, String shard) async {
+    // Buscar no Firestore
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('nick', isEqualTo: name)
+        .where('shard', isEqualTo: shard)
+        .get();
+
+    // Verificar se encontrou o usuário
+    if (querySnapshot.docs.isNotEmpty) {
+      var doc = querySnapshot.docs.first;
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      Friend friend = Friend(
+        id: -1,
+        name: data['nick'] as String,
+        status: data['status'] as String,
+        photo: data['photo'] as String,
+        shard: data['shard'] as String,
+        isOnline: true,
+      );
+      print(friend);
+      // Adicionar ao SQLite
+      await addFriend(friend);
+      return true;
+    } else {
+      print("deu ruim foi demais");
+      return false;
     }
   }
 
@@ -145,6 +183,7 @@ class FriendsProvider with ChangeNotifier {
       name: friend.name,
       status: friend.status,
       photo: friend.photo,
+      shard: friend.shard,
       isOnline: friend.isOnline,
     );
 
@@ -178,6 +217,7 @@ class FriendsProvider with ChangeNotifier {
         name: maps[i]['name'] as String,
         status: maps[i]['status'] as String,
         photo: maps[i]['photo'] as String,
+        shard: maps[i]['shard'] as String,
         isOnline: (maps[i]['isOnline'] as int) == 1,
       );
     });
@@ -195,75 +235,14 @@ class FriendsProvider with ChangeNotifier {
     // Lista de amigos para serem inseridos
     List<Friend> tmpFriends = [
       Friend(
-          id: -1,
-          name: 'Walter Alves',
-          status: 'Squawk 7700',
-          photo:
-              'https://media-gru1-1.cdn.whatsapp.net/v/t61.24694-24/359545840_2481500805351035_6895775598026583637_n.jpg?ccb=11-4&oh=01_AdQHAgDFwtHFtKGBNvsTCUk5497SdZodBT-aZClOyG2FZw&oe=654FED6B&_nc_sid=e6ed6c&_nc_cat=106',
-          isOnline: true),
-      Friend(
-          id: -1,
-          name: 'Lilla Adhlyss',
-          status: 'Wibly Wobly Timey Wimey',
-          photo:
-              'https://media-gru1-1.cdn.whatsapp.net/v/t61.24694-24/389809921_1086000919432912_4591175991150367984_n.jpg?ccb=11-4&oh=01_AdS7j0VMMCDtfsOJZSgaL71snLJ-yNT4XHMEUKcPQAvsfA&oe=654FBDFF&_nc_sid=e6ed6c&_nc_cat=105',
-          isOnline: false),
-      Friend(
-          id: -1,
-          name: 'Vini Lages',
-          status: 'L',
-          photo:
-              'https://media-gru1-1.cdn.whatsapp.net/v/t61.24694-24/349423126_713511900534247_6867080459239269016_n.jpg?ccb=11-4&oh=01_AdTc6WEAm6yypXIP322DSHJuRy7g1ltQFid_c4FdPuMsag&oe=654FD676&_nc_sid=e6ed6c&_nc_cat=105',
-          isOnline: true),
-      Friend(
-          id: -1,
-          name: 'Sarah Kelly',
-          status: '...',
-          photo:
-              'https://media-gru1-1.cdn.whatsapp.net/v/t61.24694-24/386206090_1054385005998658_885895072102375202_n.jpg?ccb=11-4&oh=01_AdTw94KHSwfwH_XJtUht9pu6usU8_LXYNVc8qtBAOnNILg&oe=654FEAAA&_nc_sid=e6ed6c&_nc_cat=102',
-          isOnline: false),
-      Friend(
-          id: -1,
-          name: 'Dogge',
-          status: 'Snif',
-          photo:
-              'https://i.scdn.co/image/ab67616d0000b27329883b75034b015877e62408',
-          isOnline: false),
-      Friend(
-          id: -1,
-          name: 'Cecilia',
-          status: '',
-          photo:
-              'https://media-gru1-1.cdn.whatsapp.net/v/t61.24694-24/364549870_1454391151795247_3406839739301010856_n.jpg?ccb=11-4&oh=01_AdQdobkv1X0Y9b0apc5hRRfEM3aNi8zsBg9w9zZbLKwSKQ&oe=654A6CD9&_nc_sid=000000&_nc_cat=105',
-          isOnline: true),
-      Friend(
-          id: -1,
-          name: 'Luan Matsumoto',
-          status: 'Só chamadas urgentes',
-          photo:
-              'https://media-gru1-1.cdn.whatsapp.net/v/t61.24694-24/383768420_1454259188756834_908539885298978416_n.jpg?ccb=11-4&oh=01_AdQ7CpbV0aGnGLUWa2cyih-vQd464ArdI3CKO3gQvWPNfQ&oe=654FC05B&_nc_sid=e6ed6c&_nc_cat=109',
-          isOnline: false),
-      Friend(
-          id: -1,
-          name: 'Matt Canedo',
-          status: 'Então, quem é o demônio? Aquele que não deixaria que ...',
-          photo:
-              'https://media-gru1-1.cdn.whatsapp.net/v/t61.24694-24/317043083_175517208417308_1486561940290512486_n.jpg?ccb=11-4&oh=01_AdQfi2Y118IYKGqkKgOl0biiYK4oTPWnvaBRz8zlerzg9g&oe=654A7D95&_nc_sid=000000&_nc_cat=101',
-          isOnline: true),
-      Friend(
-          id: -1,
-          name: 'ChatGPT',
-          status: 'Sempre online para ajudar!',
-          photo:
-              'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/ChatGPT_logo.svg/1200px-ChatGPT_logo.svg.png',
-          isOnline: true),
-      Friend(
-          id: -1,
-          name: 'Tospericargerja',
-          status: 'Brasil Tri campeao!',
-          photo:
-              'https://s2.glbimg.com/XrhDxWi0T1REUfNehtLjgRSOecg=/1200x630/filters:max_age(3600)/s04.video.glbimg.com/deo/vi/47/71/2057147',
-          isOnline: false),
+        id: -1,
+        name: 'Walter Alves',
+        status: 'Squawk 7700',
+        photo:
+            'https://engineering.unl.edu/images/staff/Kayla-Person.jpg',
+        shard: '123',
+        isOnline: true,
+      ),
     ];
 
     for (var friend in tmpFriends) {
@@ -308,6 +287,7 @@ class FriendsProvider with ChangeNotifier {
         name: maps[0]['name'] as String,
         status: maps[0]['status'] as String,
         photo: maps[0]['photo'] as String,
+        shard: maps[0]['shard'] as String,
         isOnline: (maps[0]['isOnline'] as int) == 1,
       );
     }
