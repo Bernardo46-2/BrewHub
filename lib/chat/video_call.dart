@@ -94,7 +94,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     }; */
     pc.onIceCandidate = (e) async {
       if (e.candidate != null) {
-        String field = _offer ? 'offer_ice_candidates' : 'answer_ice_candidates';
+        String field =
+            _offer ? 'offer_ice_candidates' : 'answer_ice_candidates';
         String candidateJson = jsonEncode({
           'candidate': e.candidate.toString(),
           'sdpMid': e.sdpMid.toString(),
@@ -102,7 +103,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
         });
 
         // Adicionar ao Firestore
-        DocumentReference callDoc = _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
+        DocumentReference callDoc =
+            _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
         await callDoc.update({
           field: FieldValue.arrayUnion([candidateJson])
         });
@@ -114,8 +116,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     };
 
     pc.onTrack = (RTCTrackEvent event) {
-      print(
-          '____________________________________________');
+      print('____________________________________________');
       if (event.streams.isNotEmpty) {
         print(
             ' ____________________________________________ Track added: ${event.track.id}');
@@ -144,7 +145,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     _offer = true;
 
     // Armazenar a oferta no Firestore
-    DocumentReference callDoc = _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
+    DocumentReference callDoc =
+        _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
     await callDoc.update({'offer': offer});
 
     _peerConnection!.setLocalDescription(description);
@@ -163,7 +165,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
         "______________________________________________________ CREATE ANSWER ______________________________________________________");
 
     // Armazenar a oferta no Firestore
-    DocumentReference callDoc = _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
+    DocumentReference callDoc =
+        _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
     await callDoc.update({'answer': encodedSession});
 
     _peerConnection!.setLocalDescription(description);
@@ -171,7 +174,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
   void _setRemoteDescription() async {
     // Armazenar a oferta no Firestore
-    DocumentReference callDoc = _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
+    DocumentReference callDoc =
+        _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
     final data = await callDoc.get();
     final call = data.data() as Map<String, dynamic>;
 
@@ -195,8 +199,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
   void _addCandidate() async {
     // Armazenar a oferta no Firestore
-    DocumentReference callDoc = _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
-    String field = _offer ?  'answer_ice_candidates' : 'offer_ice_candidates';
+    DocumentReference callDoc =
+        _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
+    String field = _offer ? 'answer_ice_candidates' : 'offer_ice_candidates';
     final data = await callDoc.get();
     final call = data.data() as Map<String, dynamic>;
 
@@ -207,8 +212,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
         dynamic session = await jsonDecode(jsonString);
 
         dynamic candidate = RTCIceCandidate(
-          session['candidate'], session['sdpMid'], session['sdpMlineIndex']
-        );
+            session['candidate'], session['sdpMid'], session['sdpMlineIndex']);
         print(session);
         await _peerConnection!.addCandidate(candidate);
       }
@@ -228,7 +232,12 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
   @override
   void dispose() async {
+    _localStream?.getTracks().forEach((track) {
+      track.stop();
+    });
+  
     sdpController.dispose();
+    _peerConnection?.dispose();
 
     _localVideoRenderer.srcObject?.getTracks().forEach((track) {
       track.stop();
