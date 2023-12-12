@@ -15,18 +15,20 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPage extends State<SettingsPage> {
   static const String _photoUrlKey = 'photoUrl';
   static const String _nameKey = 'nick';
+  static const String _shardKey = 'shard';
   static const String _statusKey = 'status';
   String _photoUrl = '';
   String _name = '';
+  String _shard = '';
   String _status = '';
 
   ImageProvider loadPhotoUrl(String photo) {
-    if(photo.startsWith('http')) {
+    if (photo.startsWith('http')) {
       return NetworkImage(photo, scale: 1);
     }
     return const AssetImage('assets/doggo.jpg');
   }
-  
+
   Future<void> initValue(void Function(String?) pred, String key) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     pred(prefs.getString(key));
@@ -43,25 +45,18 @@ class _SettingsPage extends State<SettingsPage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove(key);
   }
-  
+
   Widget _buildSettingsItem(IconData icon, String text, void Function() pred) {
     return ListTile(
-      leading: Icon(
-        icon, 
-        color: Colors.white
-      ),
-      title: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
+        leading: Icon(icon, color: Colors.white),
+        title: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.white,
+          ),
         ),
-      ),
-      trailing: const Icon(
-        Icons.chevron_right,
-        color: Colors.white
-      ),
-      onTap: pred
-    );
+        trailing: const Icon(Icons.chevron_right, color: Colors.white),
+        onTap: pred);
   }
 
   @override
@@ -96,16 +91,17 @@ class _SettingsPage extends State<SettingsPage> {
         children: <Widget>[
           backgroundHome(ctx),
           Center(
-            child: Column(
-              children: <Widget>[
-                const SizedBox(height: 40),
-                FutureBuilder(
-                  future: initValue((value) { _photoUrl = value ?? _photoUrl; }, _photoUrlKey),
-                  builder: (context, snapshot) {
-                    if(snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    }
-                    return GestureDetector(
+            child: Column(children: <Widget>[
+              const SizedBox(height: 40),
+              FutureBuilder(
+                future: initValue((value) {
+                  _photoUrl = value ?? _photoUrl;
+                }, _photoUrlKey),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  }
+                  return GestureDetector(
                       child: CircleAvatar(
                         radius: 60,
                         backgroundImage: loadPhotoUrl(_photoUrl),
@@ -114,113 +110,134 @@ class _SettingsPage extends State<SettingsPage> {
                         showDialog(
                           context: ctx,
                           builder: (ctx) => ConfirmCancelModal(
-                            title: 'Alterar Foto',
-                            formPlaceholder: 'Url da foto',
-                            invalidInputMsg: 'Campo url obrigatório',
-                            action: (value) {
-                              setState(() {
-                                saveValue(() { _photoUrl = value; }, _photoUrlKey, value);
-                              });
-                            }
-                          ),
+                              title: 'Alterar Foto',
+                              formPlaceholder: 'Url da foto',
+                              invalidInputMsg: 'Campo url obrigatório',
+                              action: (value) {
+                                setState(() {
+                                  saveValue(() {
+                                    _photoUrl = value;
+                                  }, _photoUrlKey, value);
+                                });
+                              }),
                         );
                       },
                       onLongPress: () {
                         showDialog(
                           context: ctx,
                           builder: (ctx) => ConfirmCancelModal(
-                            title: 'Remover foto?',
-                            action: (_) {
-                              setState(() {
-                                removeValue(() { _photoUrl = ''; }, _photoUrlKey);
-                              });
-                            }
-                          ),
+                              title: 'Remover foto?',
+                              action: (_) {
+                                setState(() {
+                                  removeValue(() {
+                                    _photoUrl = '';
+                                  }, _photoUrlKey);
+                                });
+                              }),
                         );
-                      }
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
-                FutureBuilder(
-                  future: initValue((value) { _name = value ?? _name; }, _nameKey),
+                      });
+                },
+              ),
+              const SizedBox(height: 20),
+              FutureBuilder(
+                  future: Future.wait([
+                    initValue((value) {
+                      _name = value ?? _name;
+                    }, _nameKey),
+                    initValue((value) {
+                      _shard = value ?? _shard;
+                    }, _shardKey)
+                  ]),
                   builder: (context, snapshot) {
-                    if(snapshot.connectionState == ConnectionState.waiting) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
                     }
-                    return Text(
-                      _name,
-                      style: const TextStyle(
-                        fontSize: 18, 
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white
+                    return RichText(
+                      text: TextSpan(
+                        style: DefaultTextStyle.of(context)
+                            .style, // Estilo padrão para o texto
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: _name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          TextSpan(
+                            text: " #$_shard",
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: primary3,
+                            ),
+                          ),
+                        ],
                       ),
                     );
-                  }
-                ),
-                const SizedBox(height: 10),
-                FutureBuilder(
-                  future: initValue((value) { _status = value ?? _status; }, _statusKey),
+                  }),
+              const SizedBox(height: 10),
+              FutureBuilder(
+                  future: initValue((value) {
+                    _status = value ?? _status;
+                  }, _statusKey),
                   builder: (context, snapshot) {
-                    if(snapshot.connectionState == ConnectionState.waiting) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
                     }
                     return Text(
                       _status,
-                      style: const TextStyle(
-                        fontSize: 14, 
-                        color: Colors.grey
-                      ),
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
                     );
-                  }
+                  }),
+              const SizedBox(height: 40),
+              Expanded(
+                child: ListView(
+                  children: <Widget>[
+                    _buildSettingsItem(Icons.person, 'Alterar Nome', () {
+                      showDialog(
+                        context: ctx,
+                        builder: (ctx) => ConfirmCancelModal(
+                          title: 'Editar Nome',
+                          formPlaceholder: 'Novo nome',
+                          invalidInputMsg: 'Campo nome obrigatório',
+                          action: (value) {
+                            setState(() {
+                              saveValue(() {
+                                _name = value;
+                              }, _nameKey, value);
+                            });
+                          },
+                        ),
+                      );
+                    }),
+                    _buildSettingsItem(Icons.edit, 'Definir Status', () {
+                      showDialog(
+                        context: ctx,
+                        builder: (ctx) => ConfirmCancelModal(
+                          title: 'Editar Status',
+                          formPlaceholder: 'Novo status',
+                          invalidInputMsg: 'Campo status obrigatório',
+                          action: (value) {
+                            setState(() {
+                              saveValue(() {
+                                _status = value;
+                              }, _statusKey, value);
+                            });
+                          },
+                        ),
+                      );
+                    }),
+                    _buildSettingsItem(Icons.exit_to_app, 'Sair', () {
+                      FirebaseAuth.instance.signOut();
+                      Navigator.of(ctx).push(MaterialPageRoute(
+                          builder: (ctx) => const WelcomePage()));
+                    }),
+                  ],
                 ),
-                const SizedBox(height: 40),
-                Expanded(
-                  child: ListView(
-                    children: <Widget>[
-                      _buildSettingsItem(Icons.person, 'Alterar Nome', () {
-                        showDialog(
-                          context: ctx,
-                          builder: (ctx) => ConfirmCancelModal(
-                            title: 'Editar Nome',
-                            formPlaceholder: 'Novo nome',
-                            invalidInputMsg: 'Campo nome obrigatório',
-                            action: (value) {
-                              setState(() {
-                                saveValue(() { _name = value; }, _nameKey, value);
-                              });
-                            },
-                          ),
-                        );
-                      }),
-                      _buildSettingsItem(Icons.edit, 'Definir Status', () {
-                        showDialog(
-                          context: ctx,
-                          builder: (ctx) => ConfirmCancelModal(
-                            title: 'Editar Status',
-                            formPlaceholder: 'Novo status',
-                            invalidInputMsg: 'Campo status obrigatório',
-                            action: (value) {
-                              setState(() {
-                                saveValue(() { _status = value; }, _statusKey, value);
-                              });
-                            },
-                          ),
-                        );
-                      }),
-                      _buildSettingsItem(Icons.exit_to_app, 'Sair', () {
-                        FirebaseAuth.instance.signOut();
-                        Navigator.of(ctx).push(
-                          MaterialPageRoute(
-                            builder: (ctx) => const WelcomePage()
-                          )
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-              ]
-            ),
+              ),
+            ]),
           ),
         ],
       ),
@@ -229,13 +246,13 @@ class _SettingsPage extends State<SettingsPage> {
 }
 
 class ConfirmCancelModal extends StatefulWidget {
-  const ConfirmCancelModal({
-    Key? key,
-    required this.title,
-    this.formPlaceholder,
-    required this.action,
-    this.invalidInputMsg
-  }) : super(key: key);
+  const ConfirmCancelModal(
+      {Key? key,
+      required this.title,
+      this.formPlaceholder,
+      required this.action,
+      this.invalidInputMsg})
+      : super(key: key);
 
   final String title;
   final String? formPlaceholder;
@@ -249,7 +266,7 @@ class ConfirmCancelModal extends StatefulWidget {
 class _ConfirmCancelModal extends State<ConfirmCancelModal> {
   final TextEditingController _inputController = TextEditingController();
   String? errorMessage;
-  
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -275,21 +292,22 @@ class _ConfirmCancelModal extends State<ConfirmCancelModal> {
                 ),
               ),
             ),
-            if(widget.formPlaceholder != null) TextField(
-              controller: _inputController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.person, color: Colors.white),
-                labelText: widget.formPlaceholder,
-                labelStyle: const TextStyle(color: white75),
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
+            if (widget.formPlaceholder != null)
+              TextField(
+                controller: _inputController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.person, color: Colors.white),
+                  labelText: widget.formPlaceholder,
+                  labelStyle: const TextStyle(color: white75),
+                  filled: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide.none,
+                  ),
+                  fillColor: dark2_75,
                 ),
-                fillColor: dark2_75,
               ),
-            ),
             if (errorMessage != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
@@ -305,27 +323,28 @@ class _ConfirmCancelModal extends State<ConfirmCancelModal> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: feedbackBlue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: feedbackBlue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
-                  ),
-                  child: const Text('Confirmar'),
-                  onPressed: () {
-                    if(_inputController.text.isNotEmpty || (widget.formPlaceholder == null && widget.invalidInputMsg == null)) {
-                      setState(() {
-                        errorMessage = null;
-                      });
-                      widget.action(_inputController.text);
-                      Navigator.pop(context);
-                    } else {
-                      setState(() {
-                        errorMessage = widget.invalidInputMsg;
-                      });
-                    }
-                  }
-                ),
+                    child: const Text('Confirmar'),
+                    onPressed: () {
+                      if (_inputController.text.isNotEmpty ||
+                          (widget.formPlaceholder == null &&
+                              widget.invalidInputMsg == null)) {
+                        setState(() {
+                          errorMessage = null;
+                        });
+                        widget.action(_inputController.text);
+                        Navigator.pop(context);
+                      } else {
+                        setState(() {
+                          errorMessage = widget.invalidInputMsg;
+                        });
+                      }
+                    }),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: feedbackRed,
