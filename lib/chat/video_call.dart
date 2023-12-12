@@ -196,7 +196,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   void _addCandidate() async {
     // Armazenar a oferta no Firestore
     DocumentReference callDoc = _firestore.collection('call').doc("IUnXecdvZ7ToAgDAWI7I");
-    String field = _offer ? 'offer_ice_candidates' : 'answer_ice_candidates';
+    String field = _offer ?  'answer_ice_candidates' : 'offer_ice_candidates';
     final data = await callDoc.get();
     final call = data.data() as Map<String, dynamic>;
 
